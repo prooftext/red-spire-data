@@ -407,10 +407,9 @@ toml
 python = "^3.13"
 fastapi = "0.109.0"
 uvicorn = {extras = ["standard"], version = "0.27.0"}
-gunicorn = "21.2.0"
-asyncpg = "0.29.0"
-pydantic = "2.0.0"
-pydantic-settings = "2.0.0"
+asyncpg = "0.28.0"
+pydantic = "^2.0.0"
+pydantic-settings = "^2.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
@@ -423,7 +422,7 @@ services:
     name: red-spire-data
     runtime: python
     buildCommand: "poetry install --no-dev"
-    startCommand: "poetry run gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:10000"
+    startCommand: "poetry run uvicorn app.main:app --host 0.0.0.0 --port 10000"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
