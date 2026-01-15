@@ -411,9 +411,7 @@ gunicorn = "21.2.0"
 asyncpg = "0.29.0"
 pydantic = "2.0.0"
 pydantic-settings = "2.0.0"
-python-jose = {extras = ["cryptography"], version = "3.3.0"}
-passlib = {extras = ["bcrypt"], version = "1.7.4"}
-httpx = "0.26.0"
+
 
 [tool.poetry.group.dev.dependencies]
 pytest = "7.4.4"
