@@ -1,5 +1,4 @@
 import pytest
-import asyncpg
 from app.database import init_db, close_db
 
 @pytest.fixture(scope="session")
