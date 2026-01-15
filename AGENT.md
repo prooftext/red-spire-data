@@ -21,7 +21,7 @@ This repository contains the FastAPI backend service for the Prooftext Keystroke
 
 | Language | Technology |
 |-----------|------------|
-| Language | Python 3.14+ |
+| Language | Python 3.13+ |
 | Framework | FastAPI |
 | Database Driver | asyncpg |
 | Validation | Pydantic v2 |
@@ -60,7 +60,8 @@ This repository contains the FastAPI backend service for the Prooftext Keystroke
 │ ├── test_collect.py
 │ ├── test_verify.py
 │ └── test_scoring.py
-├── requirements.txt
+├── pyproject.toml
+├── poetry.lock
 ├── Dockerfile
 ├── render.yaml
 └── README.md
@@ -400,38 +401,41 @@ async def verify_text(request: VerifyRequest):
             confidence=prob,
             matched_session_id=str(result["session_id"])
         )
-Dependencies (requirements.txt)
-text
-fastapi==0.109.0
-uvicorn[standard]==0.27.0
-asyncpg==0.29.0
-pydantic==2.5.0
-pydantic-settings==2.1.0
-numpy==1.26.3
-scikit-learn==1.4.0
-python-jose[cryptography]==3.3.0
-passlib[bcrypt]==1.7.4
-httpx==0.26.0
-pytest==7.4.4
-pytest-asyncio==0.23.3
+Dependencies (pyproject.toml)
+toml
+[tool.poetry.dependencies]
+python = "^3.13"
+fastapi = "0.109.0"
+uvicorn = {extras = ["standard"], version = "0.27.0"}
+gunicorn = "21.2.0"
+asyncpg = "0.29.0"
+pydantic = "2.0.0"
+pydantic-settings = "2.0.0"
+python-jose = {extras = ["cryptography"], version = "3.3.0"}
+passlib = {extras = ["bcrypt"], version = "1.7.4"}
+httpx = "0.26.0"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "7.4.4"
+pytest-asyncio = "0.23.3"
 Render Deployment (render.yaml)
 text
 services:
   - type: web
-    name: keystroke-api
+    name: red-spire-data
     runtime: python
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port 10000"
+    buildCommand: "poetry install --no-dev"
+    startCommand: "poetry run gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:10000"
     envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: keystroke-db
+          name: prooftext
           property: connectionString
       - key: DEBUG
         value: "false"
 
 databases:
-  - name: keystroke-db
+  - name: prooftext
     plan: free
 Environment Variables
 Variable	Required	Description

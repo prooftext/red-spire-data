@@ -1,13 +1,17 @@
-FROM python:3.14-slim
+FROM python:3.13-slim
 
 WORKDIR /app
 
-COPY requirements.txt .
+# Install Poetry
+RUN pip install poetry
 
-RUN pip install -r requirements.txt
+COPY pyproject.toml poetry.lock* ./
+
+RUN poetry config virtualenvs.create false \
+    && poetry install --no-dev --no-interaction --no-ansi
 
 COPY . .
 
 EXPOSE 10000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "10000"]
+CMD ["poetry", "run", "gunicorn", "app.main:app", "-w", "4", "-k", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:10000"]

@@ -2,4 +2,4 @@
 Server code for the Prooftext keystroke biometrics authentication system.
 
 ## Requirements
-- Python 3.14+
+- Python 3.13+
