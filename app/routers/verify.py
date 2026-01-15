@@ -9,7 +9,7 @@ router = APIRouter()
 @router.post("/verify", response_model=VerifyResponse)
 async def verify_text(request: VerifyRequest):
     pool = get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         result = await search_document(conn, request.document_text)
         
         if not result:

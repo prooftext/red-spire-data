@@ -19,13 +19,12 @@ This repository contains the FastAPI backend service for the Prooftext Keystroke
 
 ## Technology Stack
 
-| Language | Technology |
+| Component | Technology |
 |-----------|------------|
 | Language | Python 3.13+ |
 | Framework | FastAPI |
-| Database Driver | asyncpg |
+| Database Driver | psycopg 3 |
 | Validation | Pydantic v2 |
-| ML/Stats | NumPy, scikit-learn |
 | Hosting | Render Web Service |
 
 ---
@@ -407,7 +406,7 @@ toml
 python = "^3.13"
 fastapi = "0.109.0"
 uvicorn = {extras = ["standard"], version = "0.27.0"}
-asyncpg = "0.28.0"
+psycopg = {extras = ["binary"], version = "^3.1"}
 pydantic = "^2.0.0"
 pydantic-settings = "^2.0.0"
 

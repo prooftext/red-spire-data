@@ -5,5 +5,5 @@ async def create_session(conn, request, metrics, human_prob, status):
     
     await conn.execute("""
         INSERT INTO typing_sessions (session_id, user_id, document_text, session_start, session_end, total_duration_ms, verification_status, human_probability, session_metrics, analyzed_at)
-        VALUES ($1::uuid, $2::uuid, $3, $4, $5, $6, $7, $8, $9, NOW())
-    """, request.session_id, request.user_id, request.document_text, session_start, session_end, total_duration_ms, status, human_prob, metrics)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+    """, (request.session_id, request.user_id, request.document_text, session_start, session_end, total_duration_ms, status, human_prob, metrics))

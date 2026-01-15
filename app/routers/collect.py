@@ -12,7 +12,7 @@ router = APIRouter()
 @router.post("/collect", response_model=CollectResponse)
 async def collect_keystroke(request: CollectRequest, background: BackgroundTasks):
     pool = get_pool()
-    async with pool.acquire() as conn:
+    async with pool.connection() as conn:
         # Extract metrics
         metrics = extract_metrics(request.events)
         
