@@ -10,7 +10,7 @@ async def lifespan(app: FastAPI):
     await close_db()
 
 app = FastAPI(
-    title="Keystroke Biometrics API",
+    title="Prooftext API",
     version="1.0.0",
     lifespan=lifespan
 )

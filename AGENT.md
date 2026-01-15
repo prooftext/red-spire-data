@@ -4,11 +4,11 @@
 ## AGENT.md – Backend Service Repository
 
 ```markdown
-# AGENT.md – Keystroke Biometrics API Service
+# AGENT.md – Prooftext Keystroke Biometrics API Service
 
 ## Project Purpose
 
-This repository contains the FastAPI backend service for the Keystroke Biometrics Authentication System. The service:
+This repository contains the FastAPI backend service for the Prooftext Keystroke Biometrics Authentication System. The service:
 
 - Receives keystroke event streams from client plugins
 - Computes behavioral metrics and human probability scores
