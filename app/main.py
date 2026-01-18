@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from contextlib import asynccontextmanager
 from app.database import init_db, close_db
 from app.routers import collect, verify
@@ -17,6 +18,10 @@ app = FastAPI(
 
 app.include_router(collect.router, prefix="/api/v1/keystroke", tags=["collect"])
 app.include_router(verify.router, prefix="/api/v1/keystroke", tags=["verify"])
+
+@app.get("/")
+async def root():
+    return RedirectResponse(url="/docs")
 
 @app.get("/health")
 async def health():
