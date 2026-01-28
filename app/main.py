@@ -1,14 +1,18 @@
 from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from contextlib import asynccontextmanager
+import os
 from app.database import init_db, close_db
 from app.routers import collect, verify
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
-    yield
-    await close_db()
+    if not os.getenv("TESTING"):
+        await init_db()
+        yield
+        await close_db()
+    else:
+        yield
 
 app = FastAPI(
     title="Prooftext API",
