@@ -21,7 +21,17 @@ def extract_metrics(events: List[KeystrokeEvent]) -> dict:
     
     total_keystrokes = len(events)
     dwell_times = [e.dwellTimeMicros for e in events if e.dwellTimeMicros is not None]
-    flight_times = [e.flightTimeMicros for e in events if e.flightTimeMicros is not None]
+    
+    # Calculate flight times from timestamp differences if not provided
+    flight_times = []
+    for i in range(len(events) - 1):
+        if events[i+1].timestamp and events[i].timestamp:
+            # Calculate time difference in microseconds
+            time_diff_seconds = (events[i+1].timestamp - events[i].timestamp).total_seconds()
+            flight_time_micros = int(time_diff_seconds * 1_000_000)
+            flight_times.append(flight_time_micros)
+        elif events[i+1].flightTimeMicros is not None:
+            flight_times.append(events[i+1].flightTimeMicros)
     
     avg_dwell = sum(dwell_times) / len(dwell_times) if dwell_times else 0
     std_dwell = (sum((x - avg_dwell)**2 for x in dwell_times) / len(dwell_times))**0.5 if dwell_times else 0
@@ -37,8 +47,9 @@ def extract_metrics(events: List[KeystrokeEvent]) -> dict:
     delete_count = sum(1 for e in events if e.key == 'Delete')
     format_changes = sum(1 for e in events if e.formatAction)
     
-    pauses_over_2sec = sum(1 for e in events if e.flightTimeMicros and e.flightTimeMicros > 2000000)
-    longest_pause = max((e.flightTimeMicros for e in events if e.flightTimeMicros), default=0)
+    # Count pauses over 2 seconds (2,000,000 microseconds)
+    pauses_over_2sec = sum(1 for t in flight_times if t > 2_000_000)
+    longest_pause_micros = max(flight_times) if flight_times else 0
     
     paste_ratio = paste_events / total_keystrokes if total_keystrokes else 0
     
@@ -54,6 +65,6 @@ def extract_metrics(events: List[KeystrokeEvent]) -> dict:
         "deleteCount": delete_count,
         "formatChanges": format_changes,
         "pausesOver2Sec": pauses_over_2sec,
-        "longestPauseMs": longest_pause / 1000 if longest_pause else 0,
+        "longestPauseMs": longest_pause_micros / 1000 if longest_pause_micros else 0,
         "pasteRatio": paste_ratio
     }
