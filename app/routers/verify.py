@@ -1,4 +1,4 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException
 from app.models.requests import VerifyRequest
 from app.models.responses import VerifyResponse
 from app.services.search import search_document
@@ -9,6 +9,8 @@ router = APIRouter()
 @router.post("/verify", response_model=VerifyResponse)
 async def verify_text(request: VerifyRequest):
     pool = get_pool()
+    if pool is None:
+        raise HTTPException(status_code=503, detail="Database connection not initialized")
     async with pool.connection() as conn:
         result = await search_document(conn, request.document_text)
         

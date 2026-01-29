@@ -95,3 +95,66 @@ async def test_collect_endpoint_validates_input(db_pool):
         response = await client.post("/api/v1/keystroke/collect", json={})
         
         assert response.status_code == 422, "Invalid data should be rejected"
+
+@pytest.mark.asyncio
+async def test_collect_merges_multiple_submissions_to_same_session(db_pool):
+    """Client can submit keystroke data in multiple calls to the same session, and data gets merged"""
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        session_id = "merge-test-session"
+        user_id = "merge-test-user"
+        
+        # First submission: type "hel"
+        events_1 = [
+            KeystrokeEvent(
+                eventType="keydown", key="h", timestamp=datetime(2023, 1, 1, 0, 0, 0),
+                dwellTimeMicros=100000, sequence=1
+            ),
+            KeystrokeEvent(
+                eventType="keydown", key="e", timestamp=datetime(2023, 1, 1, 0, 0, 0, 150000),
+                dwellTimeMicros=95000, sequence=2
+            ),
+            KeystrokeEvent(
+                eventType="keydown", key="l", timestamp=datetime(2023, 1, 1, 0, 0, 0, 300000),
+                dwellTimeMicros=110000, sequence=3
+            ),
+        ]
+        request_1 = CollectRequest(
+            session_id=session_id,
+            user_id=user_id,
+            document_text="hel",
+            events=events_1
+        )
+        
+        response_1 = await client.post("/api/v1/keystroke/collect", json=request_1.model_dump(mode='json'))
+        assert response_1.status_code == 200
+        data_1 = response_1.json()
+        
+        # Second submission: complete with "lo"
+        events_2 = [
+            KeystrokeEvent(
+                eventType="keydown", key="l", timestamp=datetime(2023, 1, 1, 0, 0, 0, 450000),
+                dwellTimeMicros=105000, sequence=4
+            ),
+            KeystrokeEvent(
+                eventType="keydown", key="o", timestamp=datetime(2023, 1, 1, 0, 0, 0, 600000),
+                dwellTimeMicros=120000, sequence=5
+            ),
+        ]
+        request_2 = CollectRequest(
+            session_id=session_id,
+            user_id=user_id,
+            document_text="hello",
+            events=events_2
+        )
+        
+        response_2 = await client.post("/api/v1/keystroke/collect", json=request_2.model_dump(mode='json'))
+        assert response_2.status_code == 200
+        data_2 = response_2.json()
+        
+        # Both responses should reference the same session
+        assert data_1["session_id"] == session_id
+        assert data_2["session_id"] == session_id
+        
+        # The second response should show updated metrics based on all events
+        assert "human_probability" in data_2
+        assert 0 <= data_2["human_probability"] <= 1

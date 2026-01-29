@@ -15,8 +15,9 @@ import psycopg
 os.environ["TESTING"] = "1"
 
 async def create_test_database():
-    """Create the test database if it doesn't exist"""
+    """Create the test database if it doesn't exist - uses local Docker DB"""
     try:
+        # Use postgres user to create/manage the test database
         conn = await psycopg.AsyncConnection.connect(
             "postgresql://postgres:password@localhost:5432",
             autocommit=True  # Disable transaction for CREATE DATABASE
@@ -28,15 +29,15 @@ async def create_test_database():
                 await conn.execute("""
                     SELECT pg_terminate_backend(pg_stat_activity.pid)
                     FROM pg_stat_activity
-                    WHERE pg_stat_activity.datname = 'testdb_new'
+                    WHERE pg_stat_activity.datname = 'test_prooftext'
                     AND pid <> pg_backend_pid()
                 """)
-                await conn.execute("DROP DATABASE IF EXISTS testdb_new")
+                await conn.execute("DROP DATABASE IF EXISTS test_prooftext")
             except Exception:
                 pass  # Database might not exist yet
             
             # Create the database
-            await conn.execute("CREATE DATABASE testdb_new")
+            await conn.execute("CREATE DATABASE test_prooftext")
         finally:
             await conn.close()
     except Exception as e:
@@ -55,9 +56,9 @@ async def run_migrations():
             await conn.execute(sql)
 
 def pytest_configure(config):
-    """Initialize database before tests run"""
-    # Update settings for test database
-    settings.DATABASE_URL = "postgresql://postgres:password@localhost:5432/testdb_new"
+    """Initialize database before tests run - uses local Docker DB"""
+    # Update settings for local test database (use postgres user)
+    settings.DATABASE_URL = "postgresql://postgres:password@localhost:5432/test_prooftext"
     settings.DEBUG = True
     settings.API_VERSION = "v1"
     
