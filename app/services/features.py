@@ -13,7 +13,7 @@ def extract_metrics(events: List[KeystrokeEvent]) -> dict:
     - pasteEvents, copyEvents
     - backspaceCount, deleteCount
     - formatChanges
-    - pausesOver2Sec, longestPauseMs
+    - pausesOver2Sec, longestPauseMicros (microseconds)
     - pasteRatio
     """
     if not events:
@@ -65,6 +65,6 @@ def extract_metrics(events: List[KeystrokeEvent]) -> dict:
         "deleteCount": delete_count,
         "formatChanges": format_changes,
         "pausesOver2Sec": pauses_over_2sec,
-        "longestPauseMs": longest_pause_micros / 1000 if longest_pause_micros else 0,
+        "longestPauseMicros": longest_pause_micros,
         "pasteRatio": paste_ratio
     }

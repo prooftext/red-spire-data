@@ -200,7 +200,7 @@ def extract_metrics(events: List[KeystrokeEvent]) -> dict:
     - pasteEvents, copyEvents
     - backspaceCount, deleteCount
     - formatChanges
-    - pausesOver2Sec, longestPauseMs
+    - pausesOver2Sec, longestPauseMicros
     - pasteRatio
     """
     # Implementation here
