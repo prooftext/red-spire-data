@@ -271,5 +271,45 @@ async def test_collect_merges_multiple_submissions_to_same_session():
         assert 0 <= data_2["human_probability"] <= 1
 
 
+@pytest.mark.asyncio
+async def test_live_session_metadata_and_last_session():
+    """Create a live session, then query the metadata and last-session endpoints."""
+    async with httpx.AsyncClient() as client:
+        doc_text = f"Live test document {datetime.now().isoformat()}"
+        session_id = f"live-meta-{datetime.now().timestamp()}"
+        payload = {
+            "session_id": session_id,
+            "user_id": "live-meta-user",
+            "document_text": doc_text,
+            "events": [
+                {
+                    "eventType": "keypress",
+                    "key": "L",
+                    "timestamp": datetime.now().isoformat(),
+                    "sequence": 1
+                }
+            ]
+        }
+
+        collect_resp = await client.post(f"{LIVE_API_URL}/api/v1/keystroke/collect", json=payload)
+        assert collect_resp.status_code == 200
+
+        # compute expected document_id
+        import hashlib as _hash
+        doc_id = _hash.md5(doc_text.encode('utf-8')).hexdigest()
+
+        # metadata
+        meta = await client.get(f"{LIVE_API_URL}/api/v1/keystroke/session/{session_id}/metadata")
+        assert meta.status_code == 200
+        mdata = meta.json()
+        assert mdata.get("document_id") == doc_id
+
+        # last-session
+        last = await client.get(f"{LIVE_API_URL}/api/v1/keystroke/document/{doc_id}/last-session")
+        assert last.status_code == 200
+        ldata = last.json()
+        assert ldata.get("session_id") == session_id
+
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v"])

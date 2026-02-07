@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 import os
 from app.database import init_db, close_db
 from app.routers import collect, verify
+from app.routers import sessions as sessions_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -22,6 +23,7 @@ app = FastAPI(
 
 app.include_router(collect.router, prefix="/api/v1/keystroke", tags=["collect"])
 app.include_router(verify.router, prefix="/api/v1/keystroke", tags=["verify"])
+app.include_router(sessions_router.router, prefix="/api/v1/keystroke", tags=["sessions"])
 
 @app.get("/")
 async def root():
