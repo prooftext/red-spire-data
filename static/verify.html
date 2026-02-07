@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Text - Prooftext</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+        
+        nav {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+        
+        nav a {
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav a:hover {
+            color: #764ba2;
+        }
+        
+        main {
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+        
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            resize: vertical;
+            transition: border-color 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        button {
+            flex: 1;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+        
+        .btn-verify {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-verify:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-verify:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-clear {
+            background: #f8f9fa;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+        
+        .btn-clear:hover {
+            background: #667eea;
+            color: white;
+        }
+        
+        .result {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            border-radius: 8px;
+            display: none;
+        }
+        
+        .result.show {
+            display: block;
+        }
+        
+        .result.verified {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+            color: #155724;
+        }
+        
+        .result.not-verified {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+        }
+        
+        .result.uncertain {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            color: #856404;
+        }
+        
+        .result.not-found {
+            background: #e7e9ec;
+            border-left: 4px solid #6c757d;
+            color: #383d41;
+        }
+        
+        .result h3 {
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .result-details {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            font-size: 0.9rem;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .info-box {
+            background: #e7f3ff;
+            border-left: 4px solid #2196F3;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-bottom: 2rem;
+            color: #0c5aa0;
+        }
+        
+        footer {
+            background: white;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            margin-top: 3rem;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 4px;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>🔍 Verify Text</h1>
+        <p>Check if your text matches established typing patterns</p>
+    </header>
+    
+    <nav>
+        <a href="/">Home</a>
+        <a href="/verify">Verify Text</a>
+        <a href="/docs">API Docs</a>
+        <a href="/health">Health Check</a>
+    </nav>
+    
+    <main>
+        <div class="container">
+            <h2>Text Verification</h2>
+            
+            <div class="info-box">
+                <strong>How it works:</strong> Paste text that you've previously typed and had collected by our system. We'll verify if it matches your typing patterns and indicate whether the text appears to be human-authored or AI-generated.
+            </div>
+            
+            <form id="verifyForm">
+                <div class="form-group">
+                    <label for="document_text">Paste your text here:</label>
+                    <textarea id="document_text" name="document_text" rows="8" placeholder="Paste the text you want to verify..." required></textarea>
+                </div>
+                
+                <div class="btn-group">
+                    <button type="submit" class="btn-verify">Verify Text</button>
+                    <button type="reset" class="btn-clear">Clear</button>
+                </div>
+            </form>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Analyzing text...</p>
+            </div>
+            
+            <div id="result" class="result">
+                <h3 id="resultTitle"></h3>
+                <p id="resultMessage"></p>
+                <div id="resultDetails" class="result-details"></div>
+            </div>
+            
+            <div id="error" class="error" style="display: none;"></div>
+        </div>
+    </main>
+    
+    <footer>
+        <p>&copy; 2026 Prooftext. Keystroke Biometrics Authentication Service.</p>
+    </footer>
+    
+    <script>
+        const form = document.getElementById('verifyForm');
+        const loadingEl = document.getElementById('loading');
+        const resultEl = document.getElementById('result');
+        const errorEl = document.getElementById('error');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const documentText = document.getElementById('document_text').value.trim();
+            
+            if (!documentText) {
+                showError('Please enter some text to verify.');
+                return;
+            }
+            
+            // Clear previous results
+            resultEl.classList.remove('show');
+            errorEl.style.display = 'none';
+            errorEl.textContent = '';
+            
+            // Show loading
+            loadingEl.classList.add('show');
+            
+            try {
+                const response = await fetch('/api/v1/keystroke/verify', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        document_text: documentText
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
+                displayResult(data);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showError(`Failed to verify text: ${error.message}`);
+            } finally {
+                loadingEl.classList.remove('show');
+            }
+        });
+        
+        function displayResult(data) {
+            const { can_prove_human, confidence, matched_session_id } = data;
+            
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultDetails = document.getElementById('resultDetails');
+            
+            resultEl.className = 'result show';
+            
+            let resultClass = '';
+            let title = '';
+            let message = '';
+            
+            if (can_prove_human === 'yes') {
+                resultClass = 'verified';
+                title = '✓ Human Verified';
+                message = 'This text matches your established typing patterns and appears to be human-authored.';
+            } else if (can_prove_human === 'no') {
+                resultClass = 'not-verified';
+                title = '✗ Not Verified';
+                message = 'This text does not match your typing patterns or appears to be AI-generated.';
+            } else if (can_prove_human === 'maybe') {
+                resultClass = 'uncertain';
+                title = '⚠ Uncertain';
+                message = 'The verification is inconclusive. The text may be human-authored but does not strongly match your patterns.';
+            } else {
+                resultClass = 'not-found';
+                title = '? No Match Found';
+                message = 'No matching typing pattern found in our database. Please submit sample typing data first.';
+            }
+            
+            resultEl.className = `result show ${resultClass}`;
+            resultTitle.textContent = title;
+            resultMessage.textContent = message;
+            
+            // Display details
+            let detailsHTML = `<strong>Confidence:</strong> ${(confidence * 100).toFixed(1)}%`;
+            if (matched_session_id) {
+                detailsHTML += `<br><strong>Matched Session:</strong> ${matched_session_id}`;
+            }
+            resultDetails.innerHTML = detailsHTML;
+        }
+        
+        function showError(message) {
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

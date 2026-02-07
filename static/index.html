@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prooftext - Keystroke Biometrics Authentication</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        nav {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #764ba2;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        section {
+            margin-bottom: 3rem;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .feature-card {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .feature-card h3 {
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .cta-section h2 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+
+        .btn {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 0.75rem 2rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        footer {
+            background: #f8f9fa;
+            padding: 2rem;
+            text-align: center;
+            border-top: 1px solid #ddd;
+            margin-top: 3rem;
+            color: #666;
+        }
+
+        .api-docs {
+            background: white;
+            padding: 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+
+        .api-docs code {
+            background: #f5f5f5;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🔐 Prooftext</h1>
+        <p>Keystroke Biometrics Authentication Service</p>
+    </header>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/verify">Verify Text</a>
+    </nav>
+
+    <main>
+        <section>
+            <h2>Welcome to Prooftext</h2>
+            <p>Prooftext is an advanced keystroke biometrics authentication service that analyzes typing patterns to
+                verify if text was authored by a human or generated artificially.</p>
+        </section>
+
+        <section>
+            <h2>How It Works</h2>
+            <div class="features">
+                <div class="feature-card">
+                    <h3>1. Collect Typing Data</h3>
+                    <p>Our browser extension captures keystroke patterns including timing, dwell time, and flight time
+                        between keystrokes.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>2. Analyze Patterns</h3>
+                    <p>Advanced machine learning models analyze the biometric signature of your typing to build a unique
+                        profile.</p>
+                </div>
+                <div class="feature-card">
+                    <h3>3. Verify Authenticity</h3>
+                    <p>When you submit new text, we verify it matches your established typing patterns and flag
+                        AI-generated content.</p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <h2>Key Features</h2>
+            <ul style="list-style-position: inside; line-height: 2;">
+                <li><strong>Real-time Analysis:</strong> Instant verification response</li>
+                <li><strong>High Accuracy:</strong> Multi-factor biometric analysis</li>
+                <li><strong>Privacy-Focused:</strong> All data encrypted and securely stored</li>
+                <li><strong>Cross-Device Support:</strong> Works on desktop browsers</li>
+                <li><strong>REST API:</strong> Easy integration with your applications</li>
+                <li><strong>Session Merging:</strong> Support for multiple typing submissions</li>
+            </ul>
+        </section>
+
+        <section class="cta-section">
+            <h2>Ready to Verify Text?</h2>
+            <p>Paste some text below and get instant verification results</p>
+            <a href="/verify" class="btn">Go to Verification Page</a>
+        </section>
+
+        <!-- API endpoints removed from public landing page. Swagger lives at /docs (no direct link provided). -->
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Prooftext. Keystroke Biometrics Authentication Service.</p>
+        <p style="font-size: 0.9rem; margin-top: 0.5rem;">All rights reserved.</p>
+    </footer>
+</body>
+
+</html>
