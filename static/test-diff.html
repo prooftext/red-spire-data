@@ -242,7 +242,8 @@
     <div class="container">
         <div class="test-controls">
             <h2>Test Controls</h2>
-            <p style="margin-bottom: 1rem; color: #666;">Run all test cases to see how diffs are displayed for different scenarios.</p>
+            <p style="margin-bottom: 1rem; color: #666;">Run all test cases to see how diffs are displayed for different
+                scenarios.</p>
             <div class="button-group">
                 <button class="btn-run-all" onclick="runAllTests()">Run All Tests</button>
                 <button class="btn-clear" onclick="clearAll()">Clear Results</button>
@@ -561,7 +562,7 @@
         // Simple diff algorithm - compare character by character using longest common subsequence
         function simpleDiff(text1, text2) {
             const diffs = [];
-            
+
             // Handle empty strings
             if (!text1 && !text2) return diffs;
             if (!text1) {
@@ -585,7 +586,7 @@
             // Find common suffix
             let j = 1;
             while (j <= text1.length - i && j <= text2.length - i &&
-                   text1[text1.length - j] === text2[text2.length - j]) {
+                text1[text1.length - j] === text2[text2.length - j]) {
                 j++;
             }
             j--;
@@ -648,7 +649,7 @@
 
         function generateCategorizedDiffHTML(matchedText, categorization) {
             let categoryMap = new Map();
-            
+
             // Build map from array index to category
             categorization.forEach((item, index) => {
                 categoryMap.set(index, item.category);
@@ -683,10 +684,10 @@
                 <div class="test-case">
                     <h2>${index + 1}. ${testCase.name}</h2>
                     <p class="test-description">${testCase.description}</p>
-                    ${testCase.categorization ? 
-                        generateCategorizedDiffHTML(testCase.matched, testCase.categorization) :
-                        generateDiffHTML(testCase.submitted || '', testCase.matched)
-                    }
+                    ${testCase.categorization ?
+                    generateCategorizedDiffHTML(testCase.matched, testCase.categorization) :
+                    generateDiffHTML(testCase.submitted || '', testCase.matched)
+                }
                 </div>
             `;
             return html;
