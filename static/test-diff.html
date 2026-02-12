@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diff Visualization Tests</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+            padding: 2rem;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 2rem;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .test-case {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        .test-case h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .test-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .diff-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .diff-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+
+        .diff-box h5 {
+            margin: 0 0 0.5rem 0;
+            color: #666;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .diff-content {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .diff-added {
+            background-color: #d4edda;
+            padding: 0.2rem 0.4rem;
+            border-radius: 2px;
+        }
+
+        .diff-removed {
+            background-color: #f8d7da;
+            padding: 0.2rem 0.4rem;
+            border-radius: 2px;
+            text-decoration: line-through;
+        }
+
+        .diff-highlight {
+            background-color: #fff3cd;
+            padding: 0.2rem 0.4rem;
+            border-radius: 2px;
+        }
+
+        span.category-verified-human {
+            background-color: #d4edda !important;
+            padding: 0.2rem 0.1rem !important;
+            display: inline-block;
+        }
+
+        span.category-likely-pasted {
+            background-color: #f8d7da !important;
+            padding: 0.2rem 0.1rem !important;
+            display: inline-block;
+        }
+
+        span.category-unknown {
+            background-color: #e7e9ec !important;
+            padding: 0.2rem 0.1rem !important;
+            display: inline-block;
+        }
+
+        span.category-ai-generated {
+            background-color: #fff3cd !important;
+            padding: 0.2rem 0.1rem !important;
+            display: inline-block;
+        }
+
+        .category-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+            flex-shrink: 0;
+            border: 1px solid #999;
+        }
+
+        .legend-color.verified {
+            background-color: #d4edda;
+            border-color: #28a745;
+        }
+
+        .legend-color.pasted {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .legend-color.unknown {
+            background-color: #e7e9ec;
+            border-color: #6c757d;
+        }
+
+        .legend-color.ai {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .categorized-content {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-run-all {
+            background-color: #667eea;
+            color: white;
+        }
+
+        .btn-run-all:hover {
+            background-color: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-clear {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-clear:hover {
+            background-color: #5a6268;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108, 117, 125, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>📊 Diff Visualization Test Suite</h1>
+        <p>Visual tests for text comparison functionality</p>
+    </header>
+
+    <div class="container">
+        <div class="test-controls">
+            <h2>Test Controls</h2>
+            <p style="margin-bottom: 1rem; color: #666;">Run all test cases to see how diffs are displayed for different scenarios.</p>
+            <div class="button-group">
+                <button class="btn-run-all" onclick="runAllTests()">Run All Tests</button>
+                <button class="btn-clear" onclick="clearAll()">Clear Results</button>
+            </div>
+        </div>
+
+        <div id="testResults"></div>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Prooftext - Text Comparison Test Suite</p>
+    </footer>
+
+    <script>
+        // Test cases - now includes categorization examples
+        const testCases = [
+            {
+                name: "Complete Match",
+                description: "The submitted text is identical to the matched document.",
+                submitted: "The quick brown fox jumps over the lazy dog.",
+                matched: "The quick brown fox jumps over the lazy dog."
+            },
+            {
+                name: "Verified Human Text",
+                description: "Mixed text: typed portions (green) vs pasted/unknown portions (grey).",
+                matched: "The quick brown fox jumps over the lazy dog.",
+                categorization: [
+                    { char: "T", category: "VERIFIED_HUMAN" },
+                    { char: "h", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "q", category: "VERIFIED_HUMAN" },
+                    { char: "u", category: "VERIFIED_HUMAN" },
+                    { char: "i", category: "VERIFIED_HUMAN" },
+                    { char: "c", category: "VERIFIED_HUMAN" },
+                    { char: "k", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "b", category: "UNKNOWN" },
+                    { char: "r", category: "UNKNOWN" },
+                    { char: "o", category: "UNKNOWN" },
+                    { char: "w", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "f", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "x", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "LIKELY_PASTED" },
+                    { char: "j", category: "LIKELY_PASTED" },
+                    { char: "u", category: "LIKELY_PASTED" },
+                    { char: "m", category: "LIKELY_PASTED" },
+                    { char: "p", category: "LIKELY_PASTED" },
+                    { char: "s", category: "LIKELY_PASTED" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "v", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "r", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "t", category: "UNKNOWN" },
+                    { char: "h", category: "UNKNOWN" },
+                    { char: "e", category: "UNKNOWN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "l", category: "VERIFIED_HUMAN" },
+                    { char: "a", category: "VERIFIED_HUMAN" },
+                    { char: "z", category: "VERIFIED_HUMAN" },
+                    { char: "y", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "LIKELY_PASTED" },
+                    { char: "d", category: "LIKELY_PASTED" },
+                    { char: "o", category: "LIKELY_PASTED" },
+                    { char: "g", category: "LIKELY_PASTED" },
+                    { char: ".", category: "VERIFIED_HUMAN" }
+                ]
+            },
+            {
+                name: "Mixed Human & Pasted Text",
+                description: "Some text typed (human-verified), some text pasted (no keystrokes).",
+                matched: "I typed this myself but copied the company name Google here.",
+                categorization: [
+                    { char: "I", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "t", category: "VERIFIED_HUMAN" },
+                    { char: "y", category: "VERIFIED_HUMAN" },
+                    { char: "p", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "d", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "t", category: "VERIFIED_HUMAN" },
+                    { char: "h", category: "VERIFIED_HUMAN" },
+                    { char: "i", category: "VERIFIED_HUMAN" },
+                    { char: "s", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "m", category: "VERIFIED_HUMAN" },
+                    { char: "y", category: "VERIFIED_HUMAN" },
+                    { char: "s", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "l", category: "VERIFIED_HUMAN" },
+                    { char: "f", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "b", category: "VERIFIED_HUMAN" },
+                    { char: "u", category: "VERIFIED_HUMAN" },
+                    { char: "t", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "c", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "p", category: "VERIFIED_HUMAN" },
+                    { char: "i", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "d", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "t", category: "VERIFIED_HUMAN" },
+                    { char: "h", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "c", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "m", category: "VERIFIED_HUMAN" },
+                    { char: "p", category: "VERIFIED_HUMAN" },
+                    { char: "a", category: "VERIFIED_HUMAN" },
+                    { char: "n", category: "VERIFIED_HUMAN" },
+                    { char: "y", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "n", category: "LIKELY_PASTED" },
+                    { char: "a", category: "LIKELY_PASTED" },
+                    { char: "m", category: "LIKELY_PASTED" },
+                    { char: "e", category: "LIKELY_PASTED" },
+                    { char: " ", category: "LIKELY_PASTED" },
+                    { char: "G", category: "LIKELY_PASTED" },
+                    { char: "o", category: "LIKELY_PASTED" },
+                    { char: "o", category: "LIKELY_PASTED" },
+                    { char: "g", category: "LIKELY_PASTED" },
+                    { char: "l", category: "LIKELY_PASTED" },
+                    { char: "e", category: "LIKELY_PASTED" },
+                    { char: " ", category: "LIKELY_PASTED" },
+                    { char: "h", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "r", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: ".", category: "VERIFIED_HUMAN" }
+                ]
+            },
+            {
+                name: "Unknown Text Category",
+                description: "Text that's not in the keystroke database (unknown origin).",
+                matched: "This text has an unknown origin.",
+                categorization: [
+                    { char: "T", category: "UNKNOWN" },
+                    { char: "h", category: "UNKNOWN" },
+                    { char: "i", category: "UNKNOWN" },
+                    { char: "s", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "t", category: "UNKNOWN" },
+                    { char: "e", category: "UNKNOWN" },
+                    { char: "x", category: "UNKNOWN" },
+                    { char: "t", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "h", category: "UNKNOWN" },
+                    { char: "a", category: "UNKNOWN" },
+                    { char: "s", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "a", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "u", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: "k", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: "o", category: "UNKNOWN" },
+                    { char: "w", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "o", category: "UNKNOWN" },
+                    { char: "r", category: "UNKNOWN" },
+                    { char: "i", category: "UNKNOWN" },
+                    { char: "g", category: "UNKNOWN" },
+                    { char: "i", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: ".", category: "UNKNOWN" }
+                ]
+            },
+            {
+                name: "AI-Generated Text",
+                description: "Text flagged as AI-generated.",
+                matched: "The synergistic paradigm facilitates holistic optimization of multifaceted operational modalities.",
+                categorization: [
+                    { char: "T", category: "AI_GENERATED" },
+                    { char: "h", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: "y", category: "AI_GENERATED" },
+                    { char: "n", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "r", category: "AI_GENERATED" },
+                    { char: "g", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "c", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "p", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "r", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "d", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "g", category: "AI_GENERATED" },
+                    { char: "m", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "f", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "c", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "h", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "c", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "p", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "m", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "z", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "n", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "f", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "m", category: "AI_GENERATED" },
+                    { char: "u", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "f", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "c", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "d", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "p", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "r", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "n", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "m", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "d", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: ".", category: "AI_GENERATED" }
+                ]
+            },
+            {
+                name: "Word Additions",
+                description: "The matched document has additional words not in the submitted text.",
+                submitted: "The quick fox jumps over the dog.",
+                matched: "The quick brown fox jumps over the lazy dog."
+            },
+            {
+                name: "Empty Submitted Text",
+                description: "The submitted text is empty.",
+                submitted: "",
+                matched: "This is the matched document content."
+            },
+            {
+                name: "Empty Matched Text",
+                description: "The matched document is empty.",
+                submitted: "This is the submitted text.",
+                matched: ""
+            }
+        ];
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
+        // Simple diff algorithm - compare character by character using longest common subsequence
+        function simpleDiff(text1, text2) {
+            const diffs = [];
+            
+            // Handle empty strings
+            if (!text1 && !text2) return diffs;
+            if (!text1) {
+                diffs.push([1, text2]); // 1 = insert
+                return diffs;
+            }
+            if (!text2) {
+                diffs.push([-1, text1]); // -1 = delete
+                return diffs;
+            }
+
+            // Find common prefix
+            let i = 0;
+            while (i < text1.length && i < text2.length && text1[i] === text2[i]) {
+                i++;
+            }
+            if (i > 0) {
+                diffs.push([0, text1.substring(0, i)]); // 0 = equal
+            }
+
+            // Find common suffix
+            let j = 1;
+            while (j <= text1.length - i && j <= text2.length - i &&
+                   text1[text1.length - j] === text2[text2.length - j]) {
+                j++;
+            }
+            j--;
+
+            // Get the different parts
+            const text1Mid = text1.substring(i, text1.length - j);
+            const text2Mid = text2.substring(i, text2.length - j);
+
+            // Add the differences
+            if (text1Mid.length > 0) {
+                diffs.push([-1, text1Mid]);
+            }
+            if (text2Mid.length > 0) {
+                diffs.push([1, text2Mid]);
+            }
+
+            // Add common suffix
+            if (j > 0) {
+                diffs.push([0, text1.substring(text1.length - j)]);
+            }
+
+            return diffs;
+        }
+
+        function generateDiffHTML(submittedText, matchedText) {
+            const diffs = simpleDiff(submittedText, matchedText);
+
+            let yourText = '';
+            let matchedHTML = '';
+
+            diffs.forEach(([op, data]) => {
+                const escapedData = escapeHtml(data);
+                if (op === 1) { // INSERT
+                    matchedHTML += `<span class="diff-added">${escapedData}</span>`;
+                } else if (op === -1) { // DELETE
+                    yourText += `<span class="diff-removed">${escapedData}</span>`;
+                } else { // EQUAL
+                    yourText += escapedData;
+                    matchedHTML += escapedData;
+                }
+            });
+
+            let html = '<div class="diff-container">';
+            html += '<div class="diff-box">';
+            html += '<h5>Your Submitted Text</h5>';
+            html += '<div class="diff-content">';
+            html += yourText || '(empty)';
+            html += '</div></div>';
+
+            html += '<div class="diff-box">';
+            html += '<h5>Matched Document</h5>';
+            html += '<div class="diff-content">';
+            html += matchedHTML || '(empty)';
+            html += '</div></div>';
+
+            html += '</div>';
+
+            return html;
+        }
+
+        function generateCategorizedDiffHTML(matchedText, categorization) {
+            let categoryMap = new Map();
+            
+            // Build map from array index to category
+            categorization.forEach((item, index) => {
+                categoryMap.set(index, item.category);
+            });
+
+            let html = '<div class="diff-container">';
+            html += '<div class="diff-box">';
+            html += '<h5>Matched Document (Categorized)</h5>';
+            html += '<div class="category-legend">';
+            html += '<div class="legend-item"><div class="legend-color verified"></div><span>✓ Human Verified</span></div>';
+            html += '<div class="legend-item"><div class="legend-color pasted"></div><span>📋 Likely Pasted</span></div>';
+            html += '<div class="legend-item"><div class="legend-color unknown"></div><span>❓ Unknown</span></div>';
+            html += '<div class="legend-item"><div class="legend-color ai"></div><span>⚠️ AI Generated</span></div>';
+            html += '</div>';
+            html += '<div class="categorized-content">';
+
+            for (let i = 0; i < categorization.length; i++) {
+                const item = categorization[i];
+                const char = escapeHtml(item.char);
+                const category = item.category || 'UNKNOWN';
+                const categoryClass = 'category-' + category.toLowerCase().replace(/_/g, '-');
+                html += `<span class="${categoryClass}" title="${category}">${char}</span>`;
+            }
+
+            html += '</div></div></div>';
+
+            return html;
+        }
+
+        function generateTestCase(testCase, index) {
+            const html = `
+                <div class="test-case">
+                    <h2>${index + 1}. ${testCase.name}</h2>
+                    <p class="test-description">${testCase.description}</p>
+                    ${testCase.categorization ? 
+                        generateCategorizedDiffHTML(testCase.matched, testCase.categorization) :
+                        generateDiffHTML(testCase.submitted || '', testCase.matched)
+                    }
+                </div>
+            `;
+            return html;
+        }
+
+        function runAllTests() {
+            const resultsDiv = document.getElementById('testResults');
+            let html = '';
+
+            testCases.forEach((testCase, index) => {
+                html += generateTestCase(testCase, index);
+            });
+
+            resultsDiv.innerHTML = html;
+
+            // Scroll to results
+            setTimeout(() => {
+                resultsDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+        }
+
+        function clearAll() {
+            document.getElementById('testResults').innerHTML = '';
+        }
+
+        // Run tests on page load
+        window.addEventListener('load', () => {
+            console.log('Diff test suite loaded. Click "Run All Tests" to start.');
+        });
+    </script>
+</body>
+
+</html>

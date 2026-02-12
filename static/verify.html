@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,31 +11,31 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             line-height: 1.6;
             color: #333;
             background: #f5f7fa;
         }
-        
+
         header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             padding: 2rem;
             text-align: center;
         }
-        
+
         header h1 {
             font-size: 2rem;
             margin-bottom: 0.5rem;
         }
-        
+
         header p {
             font-size: 0.95rem;
             opacity: 0.95;
         }
-        
+
         nav {
             background: #f8f9fa;
             padding: 1rem 2rem;
@@ -43,47 +44,47 @@
             justify-content: center;
             gap: 2rem;
         }
-        
+
         nav a {
             text-decoration: none;
             color: #667eea;
             font-weight: 500;
             transition: color 0.3s;
         }
-        
+
         nav a:hover {
             color: #764ba2;
         }
-        
+
         main {
             max-width: 900px;
             margin: 2rem auto;
             padding: 0 2rem;
         }
-        
+
         .container {
             background: white;
             padding: 2rem;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-        
+
         h2 {
             color: #667eea;
             margin-bottom: 1rem;
         }
-        
+
         .form-group {
             margin-bottom: 1.5rem;
         }
-        
+
         label {
             display: block;
             margin-bottom: 0.5rem;
             font-weight: 600;
             color: #333;
         }
-        
+
         textarea {
             width: 100%;
             padding: 1rem;
@@ -94,17 +95,17 @@
             resize: vertical;
             transition: border-color 0.3s;
         }
-        
+
         textarea:focus {
             outline: none;
             border-color: #667eea;
         }
-        
+
         .btn-group {
             display: flex;
             gap: 1rem;
         }
-        
+
         button {
             flex: 1;
             padding: 0.75rem 1.5rem;
@@ -115,91 +116,91 @@
             transition: all 0.3s;
             font-size: 1rem;
         }
-        
+
         .btn-verify {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-        
+
         .btn-verify:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
         }
-        
+
         .btn-verify:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-        
+
         .btn-clear {
             background: #f8f9fa;
             color: #667eea;
             border: 2px solid #667eea;
         }
-        
+
         .btn-clear:hover {
             background: #667eea;
             color: white;
         }
-        
+
         .result {
             margin-top: 2rem;
             padding: 1.5rem;
             border-radius: 8px;
             display: none;
         }
-        
+
         .result.show {
             display: block;
         }
-        
+
         .result.verified {
             background: #d4edda;
             border-left: 4px solid #28a745;
             color: #155724;
         }
-        
+
         .result.not-verified {
             background: #f8d7da;
             border-left: 4px solid #dc3545;
             color: #721c24;
         }
-        
+
         .result.uncertain {
             background: #fff3cd;
             border-left: 4px solid #ffc107;
             color: #856404;
         }
-        
+
         .result.not-found {
             background: #e7e9ec;
             border-left: 4px solid #6c757d;
             color: #383d41;
         }
-        
+
         .result h3 {
             margin-bottom: 0.5rem;
             font-size: 1.2rem;
         }
-        
+
         .result-details {
             margin-top: 1rem;
             padding-top: 1rem;
-            border-top: 1px solid rgba(0,0,0,0.1);
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
             font-size: 0.9rem;
         }
-        
+
         .loading {
             display: none;
             text-align: center;
             padding: 2rem;
         }
-        
+
         .loading.show {
             display: block;
         }
-        
+
         .spinner {
             border: 4px solid #f3f3f3;
             border-top: 4px solid #667eea;
@@ -209,12 +210,17 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 1rem;
         }
-        
+
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
-        
+
         .info-box {
             background: #e7f3ff;
             border-left: 4px solid #2196F3;
@@ -223,7 +229,7 @@
             margin-bottom: 2rem;
             color: #0c5aa0;
         }
-        
+
         footer {
             background: white;
             padding: 2rem;
@@ -232,7 +238,7 @@
             margin-top: 3rem;
             color: #666;
         }
-        
+
         .error {
             background: #f8d7da;
             border-left: 4px solid #dc3545;
@@ -241,84 +247,191 @@
             border-radius: 4px;
             margin-top: 1rem;
         }
+
+        .diff-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .diff-section h4 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .diff-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-top: 0.5rem;
+        }
+
+        .diff-box {
+            background: #f9f9f9;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.5;
+        }
+
+        .diff-box h5 {
+            margin: 0 0 0.5rem 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .diff-content {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .diff-added {
+            background-color: #d4edda;
+            padding: 0.2rem 0.4rem;
+            border-radius: 2px;
+        }
+
+        .diff-removed {
+            background-color: #f8d7da;
+            padding: 0.2rem 0.4rem;
+            border-radius: 2px;
+            text-decoration: line-through;
+        }
+
+        .diff-highlight {
+            background-color: #fff3cd;
+            padding: 0.2rem 0.4rem;
+            border-radius: 2px;
+        }
+
+        .category-verified {
+            background-color: #d4edda;
+        }
+
+        .category-pasted {
+            background-color: #f8d7da;
+        }
+
+        .category-unknown {
+            background-color: #e7e9ec;
+        }
+
+        .category-ai {
+            background-color: #fff3cd;
+        }
+
+        .category-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .legend-text {
+            font-size: 0.9rem;
+        }
     </style>
 </head>
+
 <body>
     <header>
         <h1>🔍 Verify Text</h1>
         <p>Check if your text matches established typing patterns</p>
     </header>
-    
+
     <nav>
         <a href="/">Home</a>
         <a href="/verify">Verify Text</a>
-        <a href="/docs">API Docs</a>
-        <a href="/health">Health Check</a>
     </nav>
-    
+
     <main>
         <div class="container">
             <h2>Text Verification</h2>
-            
+
             <div class="info-box">
-                <strong>How it works:</strong> Paste text that you've previously typed and had collected by our system. We'll verify if it matches your typing patterns and indicate whether the text appears to be human-authored or AI-generated.
+                <strong>How it works:</strong> Paste text that you've previously typed and had collected by our system.
+                We'll verify if it matches your typing patterns and indicate whether the text appears to be
+                human-authored or AI-generated.
             </div>
-            
+
             <form id="verifyForm">
                 <div class="form-group">
                     <label for="document_text">Paste your text here:</label>
-                    <textarea id="document_text" name="document_text" rows="8" placeholder="Paste the text you want to verify..." required></textarea>
+                    <textarea id="document_text" name="document_text" rows="8"
+                        placeholder="Paste the text you want to verify..." required></textarea>
                 </div>
-                
+
                 <div class="btn-group">
                     <button type="submit" class="btn-verify">Verify Text</button>
                     <button type="reset" class="btn-clear">Clear</button>
                 </div>
             </form>
-            
+
             <div id="loading" class="loading">
                 <div class="spinner"></div>
                 <p>Analyzing text...</p>
             </div>
-            
+
             <div id="result" class="result">
                 <h3 id="resultTitle"></h3>
                 <p id="resultMessage"></p>
                 <div id="resultDetails" class="result-details"></div>
             </div>
-            
+
             <div id="error" class="error" style="display: none;"></div>
         </div>
     </main>
-    
+
     <footer>
         <p>&copy; 2026 Prooftext. Keystroke Biometrics Authentication Service.</p>
     </footer>
-    
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/diff_match_patch/20121119/diff_match_patch.min.js"></script>
     <script>
         const form = document.getElementById('verifyForm');
         const loadingEl = document.getElementById('loading');
         const resultEl = document.getElementById('result');
         const errorEl = document.getElementById('error');
-        
+
         form.addEventListener('submit', async (e) => {
             e.preventDefault();
-            
+
             const documentText = document.getElementById('document_text').value.trim();
-            
+
             if (!documentText) {
                 showError('Please enter some text to verify.');
                 return;
             }
-            
+
             // Clear previous results
             resultEl.classList.remove('show');
             errorEl.style.display = 'none';
             errorEl.textContent = '';
-            
+
             // Show loading
             loadingEl.classList.add('show');
-            
+
             try {
                 const response = await fetch('/api/v1/keystroke/verify', {
                     method: 'POST',
@@ -329,14 +442,14 @@
                         document_text: documentText
                     })
                 });
-                
+
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                
+
                 const data = await response.json();
                 displayResult(data);
-                
+
             } catch (error) {
                 console.error('Error:', error);
                 showError(`Failed to verify text: ${error.message}`);
@@ -344,20 +457,20 @@
                 loadingEl.classList.remove('show');
             }
         });
-        
+
         function displayResult(data) {
-            const { can_prove_human, confidence, matched_session_id } = data;
-            
+            const { can_prove_human, confidence, matched_session_id, matched_text, text_categorization } = data;
+
             const resultTitle = document.getElementById('resultTitle');
             const resultMessage = document.getElementById('resultMessage');
             const resultDetails = document.getElementById('resultDetails');
-            
+
             resultEl.className = 'result show';
-            
+
             let resultClass = '';
             let title = '';
             let message = '';
-            
+
             if (can_prove_human === 'yes') {
                 resultClass = 'verified';
                 title = '✓ Human Verified';
@@ -375,23 +488,124 @@
                 title = '? No Match Found';
                 message = 'No matching typing pattern found in our database. Please submit sample typing data first.';
             }
-            
+
             resultEl.className = `result show ${resultClass}`;
             resultTitle.textContent = title;
             resultMessage.textContent = message;
-            
+
             // Display details
             let detailsHTML = `<strong>Confidence:</strong> ${(confidence * 100).toFixed(1)}%`;
             if (matched_session_id) {
                 detailsHTML += `<br><strong>Matched Session:</strong> ${matched_session_id}`;
             }
+
+            // Add categorized diff section if we have both texts and categorization
+            if (matched_text && text_categorization) {
+                detailsHTML += generateCategorizedDiffHTML(matched_text, text_categorization);
+            } else if (matched_text) {
+                const submittedText = document.getElementById('document_text').value.trim();
+                detailsHTML += generateDiffHTML(submittedText, matched_text);
+            }
+
             resultDetails.innerHTML = detailsHTML;
         }
-        
+
+        function generateCategorizedDiffHTML(matchedText, categorization) {
+            let categoryMapMatched = new Map();
+
+            categorization.forEach((item, index) => {
+                categoryMapMatched.set(index, item.category);
+            });
+
+            let html = '<div class="diff-section"><h4>📊 Text Analysis by Category</h4>';
+
+            // Category legend
+            html += '<div class="category-legend">';
+            html += '<div class="legend-item"><div class="legend-color category-verified"></div><div class="legend-text"><strong>Human Verified</strong> - Has keystroke records</div></div>';
+            html += '<div class="legend-item"><div class="legend-color category-pasted"></div><div class="legend-text"><strong>Likely Pasted</strong> - No keystroke records</div></div>';
+            html += '<div class="legend-item"><div class="legend-color category-unknown"></div><div class="legend-text"><strong>Unknown</strong> - Not in keystroke database</div></div>';
+            html += '<div class="legend-item"><div class="legend-color category-ai"></div><div class="legend-text"><strong>AI Generated</strong> - Flagged as AI</div></div>';
+            html += '</div>';
+
+            // Display categorized matched text
+            html += '<div class="diff-container" style="grid-template-columns: 1fr;">';
+            html += '<div class="diff-box">';
+            html += '<h5>Matched Document (Categorized)</h5>';
+            html += '<div class="diff-content">';
+
+            for (let i = 0; i < categorization.length; i++) {
+                const item = categorization[i];
+                const char = escapeHtml(item.char);
+                const category = item.category || 'UNKNOWN';
+                const categoryClass = 'category-' + category.toLowerCase().replace(/_/g, '-');
+                html += `<span class="${categoryClass}" title="${category}">${char}</span>`;
+            }
+
+            html += '</div></div></div>';
+
+            return html;
+        }
+
+        function generateDiffHTML(submittedText, matchedText) {
+            const dmp = new diff_match_patch();
+            const diffs = dmp.diff_main(submittedText, matchedText);
+            dmp.diff_cleanupSemantic(diffs);
+
+            let diffSection = '<div class="diff-section"><h4>📊 Comparison</h4>';
+            diffSection += '<div class="diff-container">';
+            diffSection += '<div class="diff-box">';
+            diffSection += '<h5>Your Text</h5>';
+            diffSection += '<div class="diff-content">';
+
+            // Build side-by-side diffs
+            let yourText = '';
+            let matchedHTML = '';
+
+            diffs.forEach(([op, data]) => {
+                const escapedData = escapeHtml(data);
+                if (op === diff_match_patch.DIFF_INSERT) {
+                    // Data in matched text but not in submitted
+                    matchedHTML += `<span class="diff-added">${escapedData}</span>`;
+                } else if (op === diff_match_patch.DIFF_DELETE) {
+                    // Data in submitted text but not in matched
+                    yourText += `<span class="diff-removed">${escapedData}</span>`;
+                } else {
+                    // Data in both
+                    yourText += escapedData;
+                    matchedHTML += escapedData;
+                }
+            });
+
+            diffSection += yourText || '(empty)';
+            diffSection += '</div></div>';
+
+            diffSection += '<div class="diff-box">';
+            diffSection += '<h5>Matched Document</h5>';
+            diffSection += '<div class="diff-content">';
+            diffSection += matchedHTML || '(empty)';
+            diffSection += '</div></div>';
+
+            diffSection += '</div></div>';
+
+            return diffSection;
+        }
+
+        function escapeHtml(text) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;'
+            };
+            return text.replace(/[&<>"']/g, m => map[m]);
+        }
+
         function showError(message) {
             errorEl.textContent = message;
             errorEl.style.display = 'block';
         }
     </script>
 </body>
+
 </html>

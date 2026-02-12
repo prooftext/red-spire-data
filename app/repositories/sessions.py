@@ -45,23 +45,51 @@ async def create_or_merge_session(conn, request, metrics, human_prob, status):
     # Check if session exists
     if await session_exists(conn, session_id):
         # Merge with existing session: update the end time, duration, and recalculated metrics
-        await conn.execute("""
-            UPDATE typing_sessions
-            SET session_end = %s,
-                total_duration_ms = %s,
-                human_probability = %s,
-                verification_status = %s,
-                session_metrics = %s,
-                document_id = COALESCE(document_id, %s),
-                analyzed_at = NOW()
-            WHERE session_id = %s::uuid
-        """, (session_end, total_duration_ms, human_prob, status, json.dumps(metrics), document_id, session_id))
+        # Try with document_id, fall back without if column doesn't exist
+        try:
+            await conn.execute("""
+                UPDATE typing_sessions
+                SET session_end = %s,
+                    total_duration_ms = %s,
+                    human_probability = %s,
+                    verification_status = %s,
+                    session_metrics = %s,
+                    document_id = COALESCE(document_id, %s),
+                    analyzed_at = NOW()
+                WHERE session_id = %s::uuid
+            """, (session_end, total_duration_ms, human_prob, status, json.dumps(metrics), document_id, session_id))
+        except Exception as e:
+            # If document_id column doesn't exist, update without it
+            if "document_id" in str(e):
+                await conn.execute("""
+                    UPDATE typing_sessions
+                    SET session_end = %s,
+                        total_duration_ms = %s,
+                        human_probability = %s,
+                        verification_status = %s,
+                        session_metrics = %s,
+                        analyzed_at = NOW()
+                    WHERE session_id = %s::uuid
+                """, (session_end, total_duration_ms, human_prob, status, json.dumps(metrics), session_id))
+            else:
+                raise
     else:
         # Create new session
-        await conn.execute("""
-            INSERT INTO typing_sessions (session_id, user_id, document_text, document_id, session_start, session_end, total_duration_ms, verification_status, human_probability, session_metrics, analyzed_at)
-            VALUES (%s::uuid, %s::uuid, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
-        """, (session_id, user_id, request.document_text, document_id, session_start, session_end, total_duration_ms, status, human_prob, json.dumps(metrics)))
+        # Try to insert with document_id, fall back to without if column doesn't exist
+        try:
+            await conn.execute("""
+                INSERT INTO typing_sessions (session_id, user_id, document_text, document_id, session_start, session_end, total_duration_ms, verification_status, human_probability, session_metrics, analyzed_at)
+                VALUES (%s::uuid, %s::uuid, %s, %s, %s, %s, %s, %s, %s, %s, NOW())
+            """, (session_id, user_id, request.document_text, document_id, session_start, session_end, total_duration_ms, status, human_prob, json.dumps(metrics)))
+        except Exception as e:
+            # If document_id column doesn't exist, insert without it
+            if "document_id" in str(e):
+                await conn.execute("""
+                    INSERT INTO typing_sessions (session_id, user_id, document_text, session_start, session_end, total_duration_ms, verification_status, human_probability, session_metrics, analyzed_at)
+                    VALUES (%s::uuid, %s::uuid, %s, %s, %s, %s, %s, %s, %s, NOW())
+                """, (session_id, user_id, request.document_text, session_start, session_end, total_duration_ms, status, human_prob, json.dumps(metrics)))
+            else:
+                raise
 
 async def get_session_metadata(conn, session_id: str):
     """Return basic metadata for a session: session_id, user_id, document_id and timestamps"""
