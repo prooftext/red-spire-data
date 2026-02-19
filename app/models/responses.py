@@ -18,6 +18,7 @@ class VerifyResponse(BaseModel):
     can_prove_human: str  # "yes", "no", "maybe"
     confidence: float
     session_id: Optional[str] = None
+    username: Optional[str] = None
     document_text: Optional[str] = None
     text_categorization: Optional[list] = None  # List of TextSegment dicts
     pasted_segments: Optional[list] = None  # Deprecated: use text_categorization instead

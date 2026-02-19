@@ -1,13 +1,15 @@
 async def search_document(conn, text: str) -> dict:
     """
     Search typing_sessions for matching document.
-    Returns best match with human probability.
+    Returns best match with human probability and username.
     """
     cursor = await conn.execute("""
-        SELECT session_id, user_id, human_probability, verification_status,
-               ts_rank_cd(document_tsvector, query) AS rank, document_text
-        FROM typing_sessions, plainto_tsquery('english', %s) query
-        WHERE document_tsvector @@ query
+        SELECT ts.session_id, ts.user_id, ts.human_probability, ts.verification_status,
+               ts_rank_cd(ts.document_tsvector, query) AS rank, ts.document_text, u.username
+        FROM typing_sessions ts
+        LEFT JOIN users u ON ts.user_id = u.user_id,
+        plainto_tsquery('english', %s) query
+        WHERE ts.document_tsvector @@ query
         ORDER BY rank DESC
         LIMIT 1
     """, (text,))
@@ -39,6 +41,7 @@ async def search_document(conn, text: str) -> dict:
             "verification_status": row[3],
             "rank": row[4],
             "document_text": row[5],
+            "username": row[6],
             "keystroke_events": keystroke_events
         }
     return None

@@ -485,7 +485,7 @@
         });
 
         function displayResult(data) {
-            const { can_prove_human, confidence, session_id, document_text, text_categorization } = data;
+            const { can_prove_human, confidence, session_id, username, document_text, text_categorization } = data;
             const searchQuery = document.getElementById('document_text').value.trim();
 
             resultSectionEl.classList.add('show');
@@ -518,10 +518,10 @@
             // Display metadata
             let contentHTML = '';
 
-            if (session_id || confidence >= 0) {
+            if (confidence >= 0) {
                 contentHTML += '<div class="meta-info">';
-                if (session_id) {
-                    contentHTML += `<div class="meta-item"><span class="meta-label">Session ID</span><span class="meta-value">${escapeHtml(session_id)}</span></div>`;
+                if (username) {
+                    contentHTML += `<div class="meta-item"><span class="meta-label">Submitted by</span><span class="meta-value">${escapeHtml(username)}</span></div>`;
                 }
                 contentHTML += `<div class="meta-item"><span class="meta-label">Confidence Score</span><span class="meta-value">${(confidence * 100).toFixed(1)}%</span></div>`;
                 contentHTML += `<div class="meta-item"><span class="meta-label">Text Length</span><span class="meta-value">${document_text ? document_text.length : 0} characters</span></div>`;

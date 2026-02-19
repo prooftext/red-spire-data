@@ -25,6 +25,7 @@ async def verify_text(request: VerifyRequest):
                 can_prove_human="no",
                 confidence=0.0,
                 session_id=None,
+                username=None,
                 document_text=None,
                 text_categorization=None
             )
@@ -50,6 +51,7 @@ async def verify_text(request: VerifyRequest):
             can_prove_human=verdict,
             confidence=prob,
             session_id=str(result["session_id"]),
+            username=result.get("username"),
             document_text=document_text,
             text_categorization=text_categorization
         )

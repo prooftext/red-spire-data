@@ -10,13 +10,14 @@ Categories:
 
 from typing import List, Tuple
 from app.models.requests import KeystrokeEvent
+import json
 
 def reconstruct_text_from_keystrokes(events: List[dict]) -> str:
     """
-    Reconstruct the text that was typed from keystroke events.
+    Reconstruct the text that was typed from keystroke events ONLY.
     
     This is a simplified reconstruction that handles basic typing.
-    Returns the text that corresponds to actual keystroke events.
+    Returns the text that corresponds to actual keystroke events (not pasted text).
     """
     reconstructed = []
     
@@ -24,15 +25,20 @@ def reconstruct_text_from_keystrokes(events: List[dict]) -> str:
         event_type = event.get('event_type', '')
         event_data = event.get('event_data', {})
         
+        # Handle event_data as either dict or JSON string
+        if isinstance(event_data, str):
+            try:
+                event_data = json.loads(event_data)
+            except (json.JSONDecodeError, TypeError):
+                event_data = {}
+        
+        # Only process keydown events, not paste events
+        # Paste events are handled separately in create_text_segments
         if event_type == 'keydown':
             key = event_data.get('key', '')
             # Only include printable characters
             if len(key) == 1 and key.isprintable():
                 reconstructed.append(key)
-        elif event_type == 'paste':
-            # Paste events include the pasted text
-            pasted_text = event_data.get('pastedText') or event_data.get('pastedLength', '')
-            reconstructed.append(pasted_text)
     
     return ''.join(reconstructed)
 
@@ -136,6 +142,13 @@ def create_text_segments(
         event_data = event.get('event_data')
         
         if event_type == 'paste' and event_data:
+            # Handle event_data as either dict or JSON string
+            if isinstance(event_data, str):
+                try:
+                    event_data = json.loads(event_data)
+                except (json.JSONDecodeError, TypeError):
+                    continue
+            
             # event_data is a dict with pastedText
             pasted_text = event_data.get('pastedText')
             cursor_pos = event_data.get('cursorPosition')
