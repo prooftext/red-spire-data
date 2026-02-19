@@ -23,8 +23,8 @@ async def verify_text(request: VerifyRequest):
             return VerifyResponse(
                 can_prove_human="no",
                 confidence=0.0,
-                matched_session_id=None,
-                matched_text=None,
+                session_id=None,
+                document_text=None,
                 text_categorization=None
             )
         
@@ -61,7 +61,7 @@ async def verify_text(request: VerifyRequest):
         return VerifyResponse(
             can_prove_human=verdict,
             confidence=prob,
-            matched_session_id=str(result["session_id"]),
-            matched_text=document_text,
+            session_id=str(result["session_id"]),
+            document_text=document_text,
             text_categorization=text_categorization
         )

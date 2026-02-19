@@ -10,8 +10,8 @@ class CollectResponse(BaseModel):
 class VerifyResponse(BaseModel):
     can_prove_human: str  # "yes", "no", "maybe"
     confidence: float
-    matched_session_id: Optional[str] = None
-    matched_text: Optional[str] = None
+    session_id: Optional[str] = None
+    document_text: Optional[str] = None
     text_categorization: Optional[list] = None  # List of {char, category, position}
 
 
