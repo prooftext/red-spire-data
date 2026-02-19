@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Verify - Prooftext</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }
+
+        nav {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+        }
+
+        nav a {
+            text-decoration: none;
+            color: #667eea;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        nav a:hover {
+            color: #764ba2;
+        }
+
+        main {
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 1rem;
+        }
+
+        .test-controls {
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 4px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 1rem;
+        }
+
+        .btn-run-all {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-run-all:hover {
+            background: #764ba2;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear-all {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-clear-all:hover {
+            background: #d0d0d0;
+        }
+
+        .test-case {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
+
+        .test-case.passed {
+            border-left: 4px solid #28a745;
+            background: #f0f9f0;
+        }
+
+        .test-case.failed {
+            border-left: 4px solid #dc3545;
+            background: #f9f0f0;
+        }
+
+        .test-case.running {
+            border-left: 4px solid #ffc107;
+            background: #fffaf0;
+        }
+
+        .test-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .test-title {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .test-button {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .test-button:hover {
+            background: #764ba2;
+        }
+
+        .test-case.passed .test-button,
+        .test-case.failed .test-button {
+            display: none;
+        }
+
+        .test-case.running .test-button {
+            background: #ffc107;
+            color: #333;
+            cursor: not-allowed;
+        }
+
+        .test-status {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .test-case.passed .test-status,
+        .test-case.failed .test-status,
+        .test-case.running .test-status {
+            display: block;
+        }
+
+        .status-passed {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-failed {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-running {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .result-details {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: white;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .verdict-yes {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .verdict-no {
+            color: #dc3545;
+            font-weight: 600;
+        }
+
+        .verdict-maybe {
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+            border-top: 1px solid #ddd;
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <h1>🧪 Test Verify Endpoint</h1>
+        <p>Automated testing for the verification system</p>
+    </header>
+
+    <nav>
+        <a href="/">Home</a>
+        <a href="/verify">Verify Text</a>
+    </nav>
+
+    <main>
+        <div class="container">
+            <h2>Endpoint Test Cases</h2>
+            <p style="margin-bottom: 1.5rem; color: #666;">Run automated tests against the verify endpoint to ensure
+                it's working correctly.</p>
+
+            <div class="test-controls">
+                <button class="btn-run-all" onclick="runAllTests()">▶ Run All Tests</button>
+                <button class="btn-clear-all" onclick="clearAllResults()">🔄 Clear Results</button>
+            </div>
+
+            <div id="testCases"></div>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Prooftext. Keystroke Biometrics Authentication Service.</p>
+    </footer>
+
+    <script>
+        // Define test cases
+        const testCases = [
+            {
+                id: 'no-match',
+                name: 'Empty Document - No Match',
+                description: 'Verify with text that has no collected sessions',
+                input: 'This text has never been collected in any typing session',
+                expectedVerdictIn: ['no', 'maybe'],
+                expectedConfidenceLessThan: 0.6
+            },
+            {
+                id: 'valid-response',
+                name: 'Valid Response Structure',
+                description: 'Ensure response has required fields',
+                input: 'Test document for verification',
+                expectedFields: ['can_prove_human', 'confidence', 'session_id', 'document_text'],
+            },
+            {
+                id: 'confidence-range',
+                name: 'Confidence Score Range',
+                description: 'Confidence score should be between 0 and 1',
+                input: 'Another test for confidence validation',
+                expectedConfidenceMin: 0,
+                expectedConfidenceMax: 1
+            }
+        ];
+
+        // Render test cases
+        function renderTestCases() {
+            const container = document.getElementById('testCases');
+            container.innerHTML = testCases.map(test => `
+                <div class="test-case" id="test-${test.id}">
+                    <div class="test-header">
+                        <div class="test-title">${test.name}</div>
+                        <button class="test-button" onclick="runTest('${test.id}')">Run Test</button>
+                    </div>
+                    <p style="color: #666; font-size: 0.9rem;">${test.description}</p>
+                    <div class="test-status"></div>
+                    <div class="result-details"></div>
+                </div>
+            `).join('');
+        }
+
+        // Run single test
+        async function runTest(testId) {
+            const testCase = testCases.find(t => t.id === testId);
+            const testEl = document.getElementById(`test-${testId}`);
+            if (!testCase || !testEl) return;
+
+            // Set running state
+            testEl.classList.remove('passed', 'failed');
+            testEl.classList.add('running');
+            const statusEl = testEl.querySelector('.test-status');
+            statusEl.className = 'test-status status-running';
+            statusEl.innerHTML = '⏳ Running...';
+
+            try {
+                const response = await fetch('/api/v1/keystroke/verify', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ document_text: testCase.input })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                // Validate response
+                let passed = true;
+                let details = [];
+
+                // Check required fields
+                if (testCase.expectedFields) {
+                    for (const field of testCase.expectedFields) {
+                        if (!(field in data)) {
+                            passed = false;
+                            details.push(`❌ Missing field: ${field}`);
+                        } else {
+                            details.push(`✓ Field present: ${field}`);
+                        }
+                    }
+                }
+
+                // Check verdict
+                if (testCase.expectedVerdictIn) {
+                    if (testCase.expectedVerdictIn.includes(data.can_prove_human)) {
+                        details.push(`✓ Verdict "${data.can_prove_human}" is expected`);
+                    } else {
+                        passed = false;
+                        details.push(`❌ Verdict "${data.can_prove_human}" not in ${testCase.expectedVerdictIn}`);
+                    }
+                }
+
+                // Check confidence range
+                if (testCase.expectedConfidenceMin !== undefined) {
+                    if (data.confidence >= testCase.expectedConfidenceMin) {
+                        details.push(`✓ Confidence ${data.confidence} >= ${testCase.expectedConfidenceMin}`);
+                    } else {
+                        passed = false;
+                        details.push(`❌ Confidence ${data.confidence} < ${testCase.expectedConfidenceMin}`);
+                    }
+                }
+
+                if (testCase.expectedConfidenceMax !== undefined) {
+                    if (data.confidence <= testCase.expectedConfidenceMax) {
+                        details.push(`✓ Confidence ${data.confidence} <= ${testCase.expectedConfidenceMax}`);
+                    } else {
+                        passed = false;
+                        details.push(`❌ Confidence ${data.confidence} > ${testCase.expectedConfidenceMax}`);
+                    }
+                }
+
+                if (testCase.expectedConfidenceLessThan !== undefined) {
+                    if (data.confidence < testCase.expectedConfidenceLessThan) {
+                        details.push(`✓ Confidence ${data.confidence} < ${testCase.expectedConfidenceLessThan}`);
+                    } else {
+                        details.push(`⚠ Confidence ${data.confidence} >= ${testCase.expectedConfidenceLessThan}`);
+                    }
+                }
+
+                // Update UI
+                testEl.classList.remove('running');
+                if (passed) {
+                    testEl.classList.add('passed');
+                    statusEl.className = 'test-status status-passed';
+                    statusEl.innerHTML = `✅ PASSED`;
+                } else {
+                    testEl.classList.add('failed');
+                    statusEl.className = 'test-status status-failed';
+                    statusEl.innerHTML = `❌ FAILED`;
+                }
+
+                const detailsEl = testEl.querySelector('.result-details');
+                detailsEl.innerHTML = details.map(d => `<div>${d}</div>`).join('');
+
+            } catch (error) {
+                testEl.classList.remove('running');
+                testEl.classList.add('failed');
+                const statusEl = testEl.querySelector('.test-status');
+                statusEl.className = 'test-status status-failed';
+                statusEl.innerHTML = `❌ ERROR: ${error.message}`;
+            }
+        }
+
+        // Run all tests
+        async function runAllTests() {
+            for (const test of testCases) {
+                await runTest(test.id);
+                await new Promise(resolve => setTimeout(resolve, 500)); // Small delay between tests
+            }
+        }
+
+        // Clear all results
+        function clearAllResults() {
+            testCases.forEach(test => {
+                const testEl = document.getElementById(`test-${test.id}`);
+                if (testEl) {
+                    testEl.classList.remove('passed', 'failed', 'running');
+                    testEl.querySelector('.test-status').innerHTML = '';
+                    testEl.querySelector('.result-details').innerHTML = '';
+                }
+            });
+        }
+
+        // Initialize
+        renderTestCases();
+    </script>
+</body>
+
+</html>

@@ -19,7 +19,7 @@ async def test_verify_with_no_matching_session(db_pool):
         # Should not match any session
         assert data["can_prove_human"] == "no"
         assert data["confidence"] == 0.0
-        assert data["matched_session_id"] is None
+        assert data["session_id"] is None
 
 @pytest.mark.asyncio
 async def test_verify_finds_previously_collected_session(db_pool):
@@ -64,7 +64,7 @@ async def test_verify_finds_previously_collected_session(db_pool):
         data = verify_response.json()
         
         # Should find the matching session
-        assert data["matched_session_id"] is not None
+        assert data["session_id"] is not None
         assert data["confidence"] > 0.0
         # If the session was marked as human, it should show that
         if data["can_prove_human"] != "no":

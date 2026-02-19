@@ -5,7 +5,8 @@ from app.services.search import search_document
 from app.services.text_categorizer import (
     reconstruct_text_from_keystrokes,
     identify_keystroke_spans,
-    categorize_text_spans
+    categorize_text_spans,
+    create_text_segments
 )
 from app.database import get_pool
 
@@ -42,21 +43,8 @@ async def verify_text(request: VerifyRequest):
         
         text_categorization = None
         if keystroke_events:
-            # Reconstruct text from keystrokes
-            keystroke_text = reconstruct_text_from_keystrokes(keystroke_events)
-            
-            # Identify which spans have keystrokes
-            keystroke_spans = identify_keystroke_spans(document_text, keystroke_text)
-            
-            # Count paste events
-            paste_count = sum(1 for e in keystroke_events if e.get("event_type") == "paste")
-            
-            # Categorize text spans
-            text_categorization = categorize_text_spans(
-                document_text,
-                keystroke_spans,
-                paste_count
-            )
+            # Use the new segment-based categorization that handles pasted text
+            text_categorization = create_text_segments(document_text, keystroke_events)
         
         return VerifyResponse(
             can_prove_human=verdict,

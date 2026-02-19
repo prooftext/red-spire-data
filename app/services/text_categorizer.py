@@ -31,7 +31,7 @@ def reconstruct_text_from_keystrokes(events: List[dict]) -> str:
                 reconstructed.append(key)
         elif event_type == 'paste':
             # Paste events include the pasted text
-            pasted_text = event_data.get('pastedText', '')
+            pasted_text = event_data.get('pastedText') or event_data.get('pastedLength', '')
             reconstructed.append(pasted_text)
     
     return ''.join(reconstructed)
@@ -107,6 +107,94 @@ def categorize_text_spans(
         })
     
     return char_categories
+
+
+def create_text_segments(
+    full_document: str,
+    events: List[dict]
+) -> List[dict]:
+    """
+    Create contiguous text segments with categorization.
+    Identifies which segments were pasted based on actual pastedText from paste events.
+    
+    Returns list of segment dicts with:
+    - start, end: positions in document
+    - text: the actual text of the segment
+    - category: VERIFIED_HUMAN, LIKELY_PASTED, UNKNOWN
+    - source: "keystroke", "pasted", or "unknown"
+    """
+    if not full_document:
+        return []
+    
+    # Map character positions to their source
+    char_source = ['unknown'] * len(full_document)
+    pasted_texts = {}  # Map of position -> pasted text for pasted content
+    
+    # Extract all pasted text segments
+    for event in events:
+        event_type = event.get('event_type') or event.get('eventType')
+        event_data = event.get('event_data')
+        
+        if event_type == 'paste' and event_data:
+            # event_data is a dict with pastedText
+            pasted_text = event_data.get('pastedText')
+            cursor_pos = event_data.get('cursorPosition')
+            
+            if pasted_text and cursor_pos is not None:
+                # Find where this pasted text appears in the document starting from cursor position
+                pasted_start = full_document.find(pasted_text, cursor_pos)
+                if pasted_start != -1:
+                    pasted_end = pasted_start + len(pasted_text)
+                    for i in range(pasted_start, min(pasted_end, len(full_document))):
+                        char_source[i] = 'pasted'
+                    pasted_texts[pasted_start] = (pasted_end, pasted_text)
+            elif pasted_text and cursor_pos is None:
+                # If no cursor position, search for the pasted text anywhere in document
+                pasted_start = full_document.find(pasted_text)
+                if pasted_start != -1:
+                    pasted_end = pasted_start + len(pasted_text)
+                    for i in range(pasted_start, min(pasted_end, len(full_document))):
+                        char_source[i] = 'pasted'
+                    pasted_texts[pasted_start] = (pasted_end, pasted_text)
+    
+    # Extract keystroke positions
+    keystroke_spans = identify_keystroke_spans(full_document, reconstruct_text_from_keystrokes(events))
+    for start, end in keystroke_spans:
+        for i in range(start, min(end, len(full_document))):
+            char_source[i] = 'keystroke'
+    
+    # Create segments by merging consecutive characters with the same source
+    segments = []
+    current_start = 0
+    current_source = char_source[0]
+    
+    for i in range(1, len(full_document) + 1):
+        next_source = char_source[i] if i < len(full_document) else None
+        
+        if next_source != current_source:
+            # End of current segment
+            segment_text = full_document[current_start:i]
+            
+            # Determine category based on source
+            if current_source == 'keystroke':
+                category = 'VERIFIED_HUMAN'
+            elif current_source == 'pasted':
+                category = 'LIKELY_PASTED'
+            else:
+                category = 'UNKNOWN'
+            
+            segments.append({
+                'start': current_start,
+                'end': i,
+                'text': segment_text,
+                'category': category,
+                'source': current_source
+            })
+            
+            current_start = i
+            current_source = next_source
+    
+    return segments
 
 
 def get_category_info(category: str) -> dict:
