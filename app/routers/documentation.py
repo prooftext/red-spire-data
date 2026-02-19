@@ -97,6 +97,27 @@ SUPPORTED_EVENT_TYPES = [
             "timestamp": "2026-02-19T10:30:47.500Z",
             "sequence": 4
         }
+    ),
+    EventTypeDoc(
+        name="navigation",
+        description="A navigation key was pressed (Page Up, Page Down, or arrow keys)",
+        fields={
+            "key": "The navigation key pressed ('PageUp', 'PageDown', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight')",
+            "keyCode": "The numeric key code",
+            "timestamp": "When the navigation key was pressed (ISO 8601 format)",
+            "cursorPosition": "Position in the document after navigation",
+            "sequence": "Sequential number for ordering events",
+            "modifiers": "Keys held during the navigation (e.g., Shift, Ctrl, Alt)"
+        },
+        example={
+            "eventType": "navigation",
+            "key": "ArrowDown",
+            "keyCode": 40,
+            "timestamp": "2026-02-19T10:30:48.000Z",
+            "cursorPosition": 10,
+            "sequence": 5,
+            "modifiers": None
+        }
     )
 ]
 
@@ -114,6 +135,7 @@ async def get_supported_event_types():
     - `paste`: Text pasted via clipboard, including the pasted text
     - `delete`: Character deletions
     - `format`: Text formatting changes (bold, italic, etc.)
+    - `navigation`: Navigation keys (Page Up, Page Down, arrow keys)
     
     **Why pastedText is Important:**
     When capturing paste events, always include the `pastedText` field with the actual

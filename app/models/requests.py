@@ -3,7 +3,7 @@ from typing import List, Optional
 from datetime import datetime
 
 class KeystrokeEvent(BaseModel):
-    eventType: str = Field(..., description="Type of event: 'keydown', 'paste', 'delete', 'format'")
+    eventType: str = Field(..., description="Type of event: 'keydown', 'paste', 'delete', 'format', 'navigation'")
     key: Optional[str] = Field(None, description="The character key (for keydown events)")
     keyCode: Optional[int] = Field(None, description="Numeric key code (for keydown events)")
     timestamp: datetime = Field(..., description="When the event occurred (ISO 8601)")
