@@ -160,3 +160,48 @@ async def test_collect_merges_multiple_submissions_to_same_session(db_pool):
         # The second response should show updated metrics based on all events
         assert "human_probability" in data_2
         assert 0 <= data_2["human_probability"] <= 1
+
+@pytest.mark.asyncio
+async def test_collect_with_navigation_events(db_pool):
+    """Sessions with navigation events (arrow keys, PageUp/Down) should be accepted"""
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        # Simulate typing with navigation (selecting/editing)
+        events = [
+            KeystrokeEvent(
+                eventType="keydown", key="h", timestamp=datetime(2023, 1, 1, 0, 0, 0),
+                dwellTimeMicros=100000, sequence=1
+            ),
+            KeystrokeEvent(
+                eventType="keydown", key="e", timestamp=datetime(2023, 1, 1, 0, 0, 0, 150000),
+                dwellTimeMicros=95000, sequence=2
+            ),
+            KeystrokeEvent(
+                eventType="navigation", key="ArrowLeft", keyCode=37, timestamp=datetime(2023, 1, 1, 0, 0, 0, 300000),
+                cursorPosition=1, sequence=3
+            ),
+            KeystrokeEvent(
+                eventType="navigation", key="ArrowUp", keyCode=38, timestamp=datetime(2023, 1, 1, 0, 0, 0, 400000),
+                cursorPosition=0, sequence=4
+            ),
+            KeystrokeEvent(
+                eventType="keydown", key="l", timestamp=datetime(2023, 1, 1, 0, 0, 0, 500000),
+                dwellTimeMicros=110000, sequence=5
+            ),
+        ]
+        request_data = CollectRequest(
+            session_id="navigation-test-session",
+            user_id="test-user-nav",
+            document_text="hel",
+            events=events
+        )
+        
+        response = await client.post("/api/v1/keystroke/collect", json=request_data.model_dump(mode='json'))
+        
+        assert response.status_code == 200, f"Navigation events should be accepted, got {response.status_code}: {response.text}"
+        data = response.json()
+        
+        # Verify response structure
+        assert data["session_id"] == "navigation-test-session"
+        assert "human_probability" in data
+        assert 0 <= data["human_probability"] <= 1
+        assert data["verification_status"] in ["yes", "maybe", "no"]

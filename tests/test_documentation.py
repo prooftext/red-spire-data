@@ -29,6 +29,7 @@ async def test_get_supported_event_types(db_pool):
         event_type_names = [e["name"] for e in event_types]
         assert "keydown" in event_type_names
         assert "paste" in event_type_names
+        assert "navigation" in event_type_names
 
 
 @pytest.mark.asyncio
@@ -69,3 +70,27 @@ async def test_paste_event_documentation_includes_pasted_text(db_pool):
         # Example should show pastedText
         assert "pastedText" in paste_event["example"]
         assert paste_event["example"]["pastedText"] is not None
+
+@pytest.mark.asyncio
+async def test_navigation_event_documentation(db_pool):
+    """Test that navigation event type documentation includes proper examples"""
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        response = await client.get("/api/v1/keystroke/event-types")
+        
+        event_types = response.json()
+        nav_event = next((e for e in event_types if e["name"] == "navigation"), None)
+        
+        assert nav_event is not None, "Navigation event type should be documented"
+        assert "Page Up, Page Down, or arrow keys" in nav_event["description"]
+        
+        # Should document navigation key types
+        assert "key" in nav_event["fields"]
+        assert "ArrowLeft" in nav_event["fields"]["key"] or "arrow" in nav_event["description"].lower()
+        
+        # Example should show valid navigation parameters
+        example = nav_event["example"]
+        assert example["eventType"] == "navigation"
+        assert example["key"] in ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown"]
+        assert "keyCode" in example
+        assert "cursorPosition" in example
+
