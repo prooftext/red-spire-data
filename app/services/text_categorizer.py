@@ -6,11 +6,16 @@ Categories:
 2. LIKELY_PASTED: Text in document but no keystrokes (paste events)
 3. UNKNOWN: Text not in our keystroke db
 4. AI_GENERATED: Text flagged as AI-generated
+5. LIKELY_TRANSCRIBED: Typed from a source rather than composed
 """
 
 from typing import List, Tuple
-from app.models.requests import KeystrokeEvent
+from datetime import datetime
 import json
+from app.services.scoring import calculate_transcription_likelihood
+
+MIN_UDTIME_MICROS = -100_000
+MAX_UDTIME_MICROS = 800_000
 
 def reconstruct_text_from_keystrokes(events: List[dict]) -> str:
     """
@@ -115,9 +120,94 @@ def categorize_text_spans(
     return char_categories
 
 
+def _parse_event_data(event: dict) -> tuple[str, dict]:
+    event_type = event.get('event_type') or event.get('eventType') or ''
+    event_data = event.get('event_data') or event.get('eventData') or {}
+    if isinstance(event_data, str):
+        try:
+            event_data = json.loads(event_data)
+        except (json.JSONDecodeError, TypeError):
+            event_data = {}
+    return event_type, event_data
+
+
+def _parse_timestamp(value: str | None) -> datetime | None:
+    if not value:
+        return None
+    try:
+        return datetime.fromisoformat(value.replace('Z', '+00:00'))
+    except ValueError:
+        return None
+
+
+def extract_segment_metrics(events: List[dict], start: int, end: int) -> dict:
+    keydown_events = []
+    for event in events:
+        event_type, event_data = _parse_event_data(event)
+        if event_type != 'keydown':
+            continue
+        cursor_pos = event_data.get('cursorPosition')
+        if cursor_pos is None:
+            continue
+        if start <= cursor_pos < end:
+            keydown_events.append(event_data)
+
+    total_keystrokes = len(keydown_events)
+    if total_keystrokes == 0:
+        return {}
+
+    dwell_times = [e.get('dwellTimeMicros') for e in keydown_events if e.get('dwellTimeMicros') is not None]
+    avg_dwell = sum(dwell_times) / len(dwell_times) if dwell_times else 0
+    std_dwell = (sum((x - avg_dwell) ** 2 for x in dwell_times) / len(dwell_times)) ** 0.5 if dwell_times else 0
+
+    timestamps = [_parse_timestamp(e.get('timestamp') or e.get('pressTime')) for e in keydown_events]
+    flight_times = []
+    for i in range(len(timestamps) - 1):
+        flight_time = keydown_events[i + 1].get('flightTimeMicros')
+        if flight_time is None and timestamps[i] and timestamps[i + 1]:
+            time_diff_seconds = (timestamps[i + 1] - timestamps[i]).total_seconds()
+            flight_time = int(time_diff_seconds * 1_000_000)
+
+        if flight_time is None:
+            continue
+
+        if MIN_UDTIME_MICROS <= flight_time <= MAX_UDTIME_MICROS:
+            flight_times.append(flight_time)
+
+    avg_flight = sum(flight_times) / len(flight_times) if flight_times else 0
+    std_flight = (sum((x - avg_flight) ** 2 for x in flight_times) / len(flight_times)) ** 0.5 if flight_times else 0
+
+    backspaces = sum(1 for e in keydown_events if e.get('key') == 'Backspace')
+    pauses_over_2sec = sum(1 for t in flight_times if t > 2_000_000)
+    longest_pause_micros = max(flight_times) if flight_times else 0
+
+    total_time_sec = 0
+    if timestamps and timestamps[0] and timestamps[-1]:
+        total_time_sec = (timestamps[-1] - timestamps[0]).total_seconds()
+
+    wpm = (total_keystrokes / 5) / (total_time_sec / 60) if total_time_sec > 0 else 0
+
+    timing_sample_count = min(len(dwell_times), len(flight_times) + 1) if total_keystrokes else 0
+
+    return {
+        "totalKeystrokes": total_keystrokes,
+        "avgDwellTimeMicros": avg_dwell,
+        "stdDwellTimeMicros": std_dwell,
+        "avgFlightTimeMicros": avg_flight,
+        "stdFlightTimeMicros": std_flight,
+        "wpm": wpm,
+        "backspaceCount": backspaces,
+        "pausesOver2Sec": pauses_over_2sec,
+        "longestPauseMicros": longest_pause_micros,
+        "pasteRatio": 0.0,
+        "timingSampleCount": timing_sample_count,
+    }
+
+
 def create_text_segments(
     full_document: str,
-    events: List[dict]
+    events: List[dict],
+    transcription_threshold: float = 0.7,
 ) -> List[dict]:
     """
     Create contiguous text segments with categorization.
@@ -138,17 +228,9 @@ def create_text_segments(
     
     # Extract all pasted text segments
     for event in events:
-        event_type = event.get('event_type') or event.get('eventType')
-        event_data = event.get('event_data')
+        event_type, event_data = _parse_event_data(event)
         
         if event_type == 'paste' and event_data:
-            # Handle event_data as either dict or JSON string
-            if isinstance(event_data, str):
-                try:
-                    event_data = json.loads(event_data)
-                except (json.JSONDecodeError, TypeError):
-                    continue
-            
             # event_data is a dict with pastedText
             pasted_text = event_data.get('pastedText')
             cursor_pos = event_data.get('cursorPosition')
@@ -190,7 +272,14 @@ def create_text_segments(
             
             # Determine category based on source
             if current_source == 'keystroke':
-                category = 'VERIFIED_HUMAN'
+                segment_metrics = extract_segment_metrics(events, current_start, i)
+                segment_transcription = None
+                if segment_metrics:
+                    segment_transcription = calculate_transcription_likelihood(segment_metrics)
+                if segment_transcription is not None and segment_transcription >= transcription_threshold:
+                    category = 'LIKELY_TRANSCRIBED'
+                else:
+                    category = 'VERIFIED_HUMAN'
             elif current_source == 'pasted':
                 category = 'LIKELY_PASTED'
             else:
@@ -236,6 +325,12 @@ def get_category_info(category: str) -> dict:
             "description": "Text flagged as AI-generated",
             "color": "#FFD700",  # Gold
             "textColor": "#856404"
+        },
+        "LIKELY_TRANSCRIBED": {
+            "label": "Likely Transcribed",
+            "description": "Typed from a source rather than composed",
+            "color": "#B3D9FF",  # Light blue
+            "textColor": "#0B3D91"
         }
     }
     return info.get(category, {})

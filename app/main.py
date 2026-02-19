@@ -6,6 +6,7 @@ import os
 from pathlib import Path
 from app.database import init_db, close_db
 from app.routers import collect, verify, documentation
+from app.routers import analytics
 from app.routers import sessions as sessions_router
 
 @asynccontextmanager
@@ -28,6 +29,7 @@ app.include_router(collect.router, prefix="/api/v1/keystroke", tags=["collect"])
 app.include_router(verify.router, prefix="/api/v1/keystroke", tags=["verify"])
 app.include_router(sessions_router.router, prefix="/api/v1/keystroke", tags=["sessions"])
 app.include_router(documentation.router, prefix="/api/v1/keystroke", tags=["documentation"])
+app.include_router(analytics.router, prefix="/api/v1/keystroke", tags=["analytics"])
 
 # Serve static files
 static_dir = Path(__file__).parent.parent / "static"
@@ -53,6 +55,13 @@ async def test_verify_page():
     test_verify_file = static_dir / "test-verify.html" if static_dir.exists() else None
     if test_verify_file and test_verify_file.exists():
         return FileResponse(str(test_verify_file), media_type="text/html")
+    return RedirectResponse(url="/docs")
+
+@app.get("/performance")
+async def performance_page():
+    performance_file = static_dir / "performance.html" if static_dir.exists() else None
+    if performance_file and performance_file.exists():
+        return FileResponse(str(performance_file), media_type="text/html")
     return RedirectResponse(url="/docs")
 
 @app.get("/health")

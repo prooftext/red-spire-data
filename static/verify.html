@@ -299,6 +299,11 @@
             border-color: #ffc107;
         }
 
+        .legend-color.transcribed {
+            background-color: #cfe8ff;
+            border-color: #1e6bb8;
+        }
+
         .categorized-content {
             white-space: pre-wrap;
             word-break: break-word;
@@ -324,6 +329,12 @@
 
         span.category-ai-generated {
             background-color: #fff3cd !important;
+            padding: 0.2rem 0.1rem !important;
+            display: inline-block;
+        }
+
+        span.category-likely-transcribed {
+            background-color: #cfe8ff !important;
             padding: 0.2rem 0.1rem !important;
             display: inline-block;
         }
@@ -485,7 +496,7 @@
         });
 
         function displayResult(data) {
-            const { can_prove_human, confidence, session_id, username, document_text, text_categorization } = data;
+            const { can_prove_human, confidence, session_id, username, document_text, text_categorization, transcription_likelihood, model_ready } = data;
             const searchQuery = document.getElementById('document_text').value.trim();
 
             resultSectionEl.classList.add('show');
@@ -525,6 +536,12 @@
                 }
                 contentHTML += `<div class="meta-item"><span class="meta-label">Confidence Score</span><span class="meta-value">${(confidence * 100).toFixed(1)}%</span></div>`;
                 contentHTML += `<div class="meta-item"><span class="meta-label">Text Length</span><span class="meta-value">${document_text ? document_text.length : 0} characters</span></div>`;
+                if (typeof transcription_likelihood === 'number') {
+                    contentHTML += `<div class="meta-item"><span class="meta-label">Transcription Likelihood</span><span class="meta-value">${(transcription_likelihood * 100).toFixed(1)}%</span></div>`;
+                }
+                if (typeof model_ready === 'boolean') {
+                    contentHTML += `<div class="meta-item"><span class="meta-label">Model Readiness</span><span class="meta-value">${model_ready ? 'Ready' : 'Building'}</span></div>`;
+                }
                 contentHTML += '</div>';
             }
 
@@ -546,6 +563,7 @@
             html += '<div class="legend-item"><div class="legend-color pasted"></div><span>📋 Likely Pasted - No keystrokes detected</span></div>';
             html += '<div class="legend-item"><div class="legend-color unknown"></div><span>❓ Unknown - No keystroke data available</span></div>';
             html += '<div class="legend-item"><div class="legend-color ai"></div><span>⚠️ AI Generated</span></div>';
+            html += '<div class="legend-item"><div class="legend-color transcribed"></div><span>✍️ Likely Transcribed - Typed from a source</span></div>';
             html += '</div>';
             html += '<div class="categorized-content">';
 
@@ -556,6 +574,14 @@
                 const queryStart = docLower.indexOf(searchLower);
                 const queryEnd = queryStart + searchQuery.length;
 
+                const categoryLabels = {
+                    VERIFIED_HUMAN: 'Human Verified',
+                    LIKELY_PASTED: 'Likely Pasted',
+                    UNKNOWN: 'Unknown',
+                    AI_GENERATED: 'AI Generated',
+                    LIKELY_TRANSCRIBED: 'Likely Transcribed'
+                };
+
                 categorization.forEach((item, index) => {
                     const char = escapeHtml(item.text || item.char || '');
                     const category = (item.category || item.source || 'UNKNOWN').toUpperCase();
@@ -565,7 +591,8 @@
                     const isInQuery = queryStart !== -1 && index >= queryStart && index < queryEnd;
                     const highlightClass = isInQuery ? ' search-match' : '';
 
-                    html += `<span class="${categoryClass}${highlightClass}" title="${category}">${char}</span>`;
+                    const label = categoryLabels[category] || category;
+                    html += `<span class="${categoryClass}${highlightClass}" title="${label}">${char}</span>`;
                 });
             }
 
@@ -596,6 +623,9 @@
             if (e.key === 'Shift') shiftPressed = true;
             if (shiftPressed && e.key === 'T') {
                 window.location.href = '/test-verify';
+            }
+            if (shiftPressed && e.key === 'P') {
+                window.location.href = '/performance';
             }
         });
         document.addEventListener('keyup', (e) => {

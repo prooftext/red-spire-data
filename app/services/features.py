@@ -1,6 +1,9 @@
 from typing import List
 from app.models.requests import KeystrokeEvent
 
+MIN_UDTIME_MICROS = -100_000
+MAX_UDTIME_MICROS = 800_000
+
 def extract_metrics(events: List[KeystrokeEvent]) -> dict:
     """
     Compute session-level metrics from raw events.
@@ -22,16 +25,19 @@ def extract_metrics(events: List[KeystrokeEvent]) -> dict:
     total_keystrokes = len(events)
     dwell_times = [e.dwellTimeMicros for e in events if e.dwellTimeMicros is not None]
     
-    # Calculate flight times from timestamp differences if not provided
+    # Calculate flight times from event data or timestamp differences
     flight_times = []
     for i in range(len(events) - 1):
-        if events[i+1].timestamp and events[i].timestamp:
-            # Calculate time difference in microseconds
+        if events[i+1].flightTimeMicros is not None:
+            flight_time_micros = events[i+1].flightTimeMicros
+        elif events[i+1].timestamp and events[i].timestamp:
             time_diff_seconds = (events[i+1].timestamp - events[i].timestamp).total_seconds()
             flight_time_micros = int(time_diff_seconds * 1_000_000)
+        else:
+            continue
+
+        if MIN_UDTIME_MICROS <= flight_time_micros <= MAX_UDTIME_MICROS:
             flight_times.append(flight_time_micros)
-        elif events[i+1].flightTimeMicros is not None:
-            flight_times.append(events[i+1].flightTimeMicros)
     
     avg_dwell = sum(dwell_times) / len(dwell_times) if dwell_times else 0
     std_dwell = (sum((x - avg_dwell)**2 for x in dwell_times) / len(dwell_times))**0.5 if dwell_times else 0
@@ -52,6 +58,7 @@ def extract_metrics(events: List[KeystrokeEvent]) -> dict:
     longest_pause_micros = max(flight_times) if flight_times else 0
     
     paste_ratio = paste_events / total_keystrokes if total_keystrokes else 0
+    timing_sample_count = min(len(dwell_times), len(flight_times) + 1) if total_keystrokes else 0
     
     return {
         "totalKeystrokes": total_keystrokes,
@@ -66,5 +73,6 @@ def extract_metrics(events: List[KeystrokeEvent]) -> dict:
         "formatChanges": format_changes,
         "pausesOver2Sec": pauses_over_2sec,
         "longestPauseMicros": longest_pause_micros,
-        "pasteRatio": paste_ratio
+        "pasteRatio": paste_ratio,
+        "timingSampleCount": timing_sample_count
     }

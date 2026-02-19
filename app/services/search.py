@@ -4,8 +4,9 @@ async def search_document(conn, text: str) -> dict:
     Returns best match with human probability and username.
     """
     cursor = await conn.execute("""
-        SELECT ts.session_id, ts.user_id, ts.human_probability, ts.verification_status,
-               ts_rank_cd(ts.document_tsvector, query) AS rank, ts.document_text, u.username
+         SELECT ts.session_id, ts.user_id, ts.human_probability, ts.verification_status,
+             ts_rank_cd(ts.document_tsvector, query) AS rank, ts.document_text, u.username,
+             ts.session_metrics, ts.document_id
         FROM typing_sessions ts
         LEFT JOIN users u ON ts.user_id = u.user_id,
         plainto_tsquery('english', %s) query
@@ -42,6 +43,8 @@ async def search_document(conn, text: str) -> dict:
             "rank": row[4],
             "document_text": row[5],
             "username": row[6],
-            "keystroke_events": keystroke_events
+            "keystroke_events": keystroke_events,
+            "session_metrics": row[7],
+            "document_id": row[8]
         }
     return None

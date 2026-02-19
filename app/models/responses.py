@@ -22,6 +22,9 @@ class VerifyResponse(BaseModel):
     document_text: Optional[str] = None
     text_categorization: Optional[list] = None  # List of TextSegment dicts
     pasted_segments: Optional[list] = None  # Deprecated: use text_categorization instead
+    transcription_likelihood: Optional[float] = None
+    model_ready: Optional[bool] = None
+    detector_results: Optional[list] = None
 
 
 class SessionMetadata(BaseModel):
