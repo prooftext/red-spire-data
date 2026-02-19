@@ -56,7 +56,11 @@ async def run_migrations():
             await conn.execute(sql)
 
 def pytest_configure(config):
-    """Initialize database before tests run - uses local Docker DB"""
+    """Initialize database before tests run - uses local Docker DB for non-live tests"""
+    # Skip local DB setup for live server tests
+    if config.option.file_or_dir and any("test_live_server" in arg for arg in config.option.file_or_dir):
+        return
+    
     # Update settings for local test database (use postgres user)
     settings.DATABASE_URL = "postgresql://postgres:password@localhost:5432/test_prooftext"
     settings.DEBUG = True
