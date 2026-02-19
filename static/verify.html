@@ -328,6 +328,13 @@
             display: inline-block;
         }
 
+        span.search-match {
+            border: 2px solid #667eea;
+            box-shadow: 0 0 4px rgba(102, 126, 234, 0.6);
+            padding: 0.2rem 0.1rem !important;
+            border-radius: 2px;
+        }
+
         .loading {
             display: none;
             text-align: center;
@@ -479,6 +486,7 @@
 
         function displayResult(data) {
             const { can_prove_human, confidence, session_id, document_text, text_categorization } = data;
+            const searchQuery = document.getElementById('document_text').value.trim();
 
             resultSectionEl.classList.add('show');
 
@@ -522,7 +530,7 @@
 
             // Display categorized text if available
             if (document_text && text_categorization && text_categorization.length > 0) {
-                contentHTML += generateCategorizedTextHTML(document_text, text_categorization);
+                contentHTML += generateCategorizedTextHTML(document_text, text_categorization, searchQuery);
             } else if (document_text) {
                 contentHTML += '<p style="color: #666; padding: 1rem; background: #f9f9f9; border-radius: 4px;">Text was found but no categorization data available.</p>';
             }
@@ -530,23 +538,34 @@
             resultContentEl.innerHTML = contentHTML;
         }
 
-        function generateCategorizedTextHTML(documentText, categorization) {
+        function generateCategorizedTextHTML(documentText, categorization, searchQuery) {
             let html = '<div class="diff-box">';
             html += '<h5>Text Analysis by Source</h5>';
             html += '<div class="category-legend">';
             html += '<div class="legend-item"><div class="legend-color verified"></div><span>✓ Human Verified - Keystroke recorded</span></div>';
-            html += '<div class="legend-item"><div class="legend-color pasted"></div><span>📋 Likely Pasted - No keystrokes</span></div>';
-            html += '<div class="legend-item"><div class="legend-color unknown"></div><span>❓ Unknown - Not in database</span></div>';
+            html += '<div class="legend-item"><div class="legend-color pasted"></div><span>📋 Likely Pasted - No keystrokes detected</span></div>';
+            html += '<div class="legend-item"><div class="legend-color unknown"></div><span>❓ Unknown - No keystroke data available</span></div>';
             html += '<div class="legend-item"><div class="legend-color ai"></div><span>⚠️ AI Generated</span></div>';
             html += '</div>';
             html += '<div class="categorized-content">';
 
             if (Array.isArray(categorization)) {
-                categorization.forEach((item) => {
+                // Find the position of the search query in the document
+                const searchLower = searchQuery.toLowerCase();
+                const docLower = documentText.toLowerCase();
+                const queryStart = docLower.indexOf(searchLower);
+                const queryEnd = queryStart + searchQuery.length;
+
+                categorization.forEach((item, index) => {
                     const char = escapeHtml(item.text || item.char || '');
                     const category = (item.category || item.source || 'UNKNOWN').toUpperCase();
                     const categoryClass = 'category-' + category.toLowerCase().replace(/_/g, '-');
-                    html += `<span class="${categoryClass}" title="${category}">${char}</span>`;
+
+                    // Check if this character is part of the search query
+                    const isInQuery = queryStart !== -1 && index >= queryStart && index < queryEnd;
+                    const highlightClass = isInQuery ? ' search-match' : '';
+
+                    html += `<span class="${categoryClass}${highlightClass}" title="${category}">${char}</span>`;
                 });
             }
 

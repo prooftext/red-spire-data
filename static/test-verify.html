@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Verify - Prooftext</title>
+    <title>Text Categorization Test Cases</title>
     <style>
         * {
             margin: 0;
@@ -17,6 +17,7 @@
             line-height: 1.6;
             color: #333;
             background: #f5f7fa;
+            padding: 2rem;
         }
 
         header {
@@ -24,6 +25,8 @@
             color: white;
             padding: 2rem;
             text-align: center;
+            border-radius: 8px;
+            margin-bottom: 2rem;
         }
 
         header h1 {
@@ -37,193 +40,107 @@
         }
 
         nav {
-            background: #f8f9fa;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #ddd;
             display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
             justify-content: center;
-            gap: 2rem;
         }
 
         nav a {
-            text-decoration: none;
             color: #667eea;
+            text-decoration: none;
             font-weight: 500;
-            transition: color 0.3s;
+            padding: 0.5rem 1rem;
+            transition: all 0.3s;
         }
 
         nav a:hover {
             color: #764ba2;
-        }
-
-        main {
-            max-width: 1000px;
-            margin: 2rem auto;
-            padding: 0 2rem;
+            text-decoration: underline;
         }
 
         .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .test-case {
             background: white;
             padding: 2rem;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
         }
 
-        h2 {
+        .test-case h2 {
             color: #667eea;
             margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #667eea;
         }
 
-        .test-controls {
-            margin-bottom: 2rem;
-            display: flex;
+        .test-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            font-style: italic;
+        }
+
+        .category-legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 1rem;
-        }
-
-        button {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            font-size: 1rem;
-        }
-
-        .btn-run-all {
-            background: #667eea;
-            color: white;
-        }
-
-        .btn-run-all:hover {
-            background: #764ba2;
-            transform: translateY(-2px);
-        }
-
-        .btn-clear-all {
-            background: #e0e0e0;
-            color: #333;
-        }
-
-        .btn-clear-all:hover {
-            background: #d0d0d0;
-        }
-
-        .test-case {
-            margin-bottom: 2rem;
+            margin: 2rem 0;
             padding: 1.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            background: #f9f9f9;
-        }
-
-        .test-case.passed {
-            border-left: 4px solid #28a745;
-            background: #f0f9f0;
-        }
-
-        .test-case.failed {
-            border-left: 4px solid #dc3545;
-            background: #f9f0f0;
-        }
-
-        .test-case.running {
-            border-left: 4px solid #ffc107;
-            background: #fffaf0;
-        }
-
-        .test-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-
-        .test-title {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .test-button {
-            padding: 0.5rem 1rem;
-            font-size: 0.9rem;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        .test-button:hover {
-            background: #764ba2;
-        }
-
-        .test-case.passed .test-button,
-        .test-case.failed .test-button {
-            display: none;
-        }
-
-        .test-case.running .test-button {
-            background: #ffc107;
-            color: #333;
-            cursor: not-allowed;
-        }
-
-        .test-status {
-            display: none;
-            margin-top: 1rem;
-            padding: 1rem;
-            border-radius: 4px;
-            font-size: 0.9rem;
-        }
-
-        .test-case.passed .test-status,
-        .test-case.failed .test-status,
-        .test-case.running .test-status {
-            display: block;
-        }
-
-        .status-passed {
-            background: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-
-        .status-failed {
-            background: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        .status-running {
-            background: #fff3cd;
-            color: #856404;
-            border: 1px solid #ffeeba;
-        }
-
-        .result-details {
-            margin-top: 1rem;
-            padding: 1rem;
             background: white;
-            border-radius: 4px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
             font-size: 0.9rem;
-            max-height: 300px;
-            overflow-y: auto;
         }
 
-        .verdict-yes {
-            color: #28a745;
-            font-weight: 600;
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 3px;
+            flex-shrink: 0;
+            border: 1px solid #999;
         }
 
-        .verdict-no {
-            color: #dc3545;
-            font-weight: 600;
+        .legend-color.verified {
+            background-color: #d4edda;
+            border-color: #28a745;
         }
 
-        .verdict-maybe {
-            color: #ffc107;
-            font-weight: 600;
+        .legend-color.pasted {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+        }
+
+        .legend-color.unknown {
+            background-color: #e7e9ec;
+            border-color: #6c757d;
+        }
+
+        .legend-color.ai {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+        }
+
+        .categorized-content {
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.8;
+            padding: 1.5rem;
+            background: #f9f9f9;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
         }
 
         footer {
@@ -239,7 +156,7 @@
 <body>
     <header>
         <h1>🧪 Test Verify Endpoint</h1>
-        <p>Automated testing for the verification system</p>
+        <p>Visual test cases for text categorization</p>
     </header>
 
     <nav>
@@ -247,190 +164,329 @@
         <a href="/verify">Verify Text</a>
     </nav>
 
-    <main>
-        <div class="container">
-            <h2>Endpoint Test Cases</h2>
-            <p style="margin-bottom: 1.5rem; color: #666;">Run automated tests against the verify endpoint to ensure
-                it's working correctly.</p>
-
-            <div class="test-controls">
-                <button class="btn-run-all" onclick="runAllTests()">▶ Run All Tests</button>
-                <button class="btn-clear-all" onclick="clearAllResults()">🔄 Clear Results</button>
+    <div class="container">
+        <div class="category-legend">
+            <div class="legend-item">
+                <div class="legend-color verified"></div>
+                <div><strong>Human Verified:</strong> Keystroke recorded</div>
             </div>
-
-            <div id="testCases"></div>
+            <div class="legend-item">
+                <div class="legend-color pasted"></div>
+                <div><strong>Likely Pasted:</strong> No keystrokes</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color unknown"></div>
+                <div><strong>Unknown:</strong> Not in database</div>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color ai"></div>
+                <div><strong>AI Generated:</strong> Detected by AI</div>
+            </div>
         </div>
-    </main>
+
+        <div id="testContainer"></div>
+    </div>
 
     <footer>
-        <p>&copy; 2026 Prooftext. Keystroke Biometrics Authentication Service.</p>
+        <p>&copy; 2026 Prooftext - Text Categorization Test Suite</p>
     </footer>
 
     <script>
-        // Define test cases
+        // Test cases - hardcoded example visualizations
         const testCases = [
             {
-                id: 'no-match',
-                name: 'Empty Document - No Match',
-                description: 'Verify with text that has no collected sessions',
-                input: 'This text has never been collected in any typing session',
-                expectedVerdictIn: ['no', 'maybe'],
-                expectedConfidenceLessThan: 0.6
+                id: 'human-verified',
+                name: 'Human Verified Text',
+                description: 'Text that was typed by the user and recorded in keystrokes',
+                matched: 'The quick brown fox jumps over the lazy dog.',
+                categorization: [
+                    { char: "T", category: "VERIFIED_HUMAN" },
+                    { char: "h", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "q", category: "VERIFIED_HUMAN" },
+                    { char: "u", category: "VERIFIED_HUMAN" },
+                    { char: "i", category: "VERIFIED_HUMAN" },
+                    { char: "c", category: "VERIFIED_HUMAN" },
+                    { char: "k", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "b", category: "VERIFIED_HUMAN" },
+                    { char: "r", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "w", category: "VERIFIED_HUMAN" },
+                    { char: "n", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "f", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "x", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "j", category: "VERIFIED_HUMAN" },
+                    { char: "u", category: "VERIFIED_HUMAN" },
+                    { char: "m", category: "VERIFIED_HUMAN" },
+                    { char: "p", category: "VERIFIED_HUMAN" },
+                    { char: "s", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "v", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "r", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "t", category: "VERIFIED_HUMAN" },
+                    { char: "h", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "l", category: "VERIFIED_HUMAN" },
+                    { char: "a", category: "VERIFIED_HUMAN" },
+                    { char: "z", category: "VERIFIED_HUMAN" },
+                    { char: "y", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "d", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "g", category: "VERIFIED_HUMAN" },
+                    { char: ".", category: "VERIFIED_HUMAN" }
+                ]
             },
             {
-                id: 'valid-response',
-                name: 'Valid Response Structure',
-                description: 'Ensure response has required fields',
-                input: 'Test document for verification',
-                expectedFields: ['can_prove_human', 'confidence', 'session_id', 'document_text'],
+                id: 'mixed',
+                name: 'Mixed Human & Pasted Text',
+                description: 'Some text typed (human-verified), some text pasted (no keystrokes).',
+                matched: 'I typed this myself but copied the company name Google here.',
+                categorization: [
+                    { char: "I", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "t", category: "VERIFIED_HUMAN" },
+                    { char: "y", category: "VERIFIED_HUMAN" },
+                    { char: "p", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "d", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "t", category: "VERIFIED_HUMAN" },
+                    { char: "h", category: "VERIFIED_HUMAN" },
+                    { char: "i", category: "VERIFIED_HUMAN" },
+                    { char: "s", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "m", category: "VERIFIED_HUMAN" },
+                    { char: "y", category: "VERIFIED_HUMAN" },
+                    { char: "s", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "l", category: "VERIFIED_HUMAN" },
+                    { char: "f", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "b", category: "VERIFIED_HUMAN" },
+                    { char: "u", category: "VERIFIED_HUMAN" },
+                    { char: "t", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "c", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "p", category: "VERIFIED_HUMAN" },
+                    { char: "i", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "d", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "t", category: "VERIFIED_HUMAN" },
+                    { char: "h", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "c", category: "VERIFIED_HUMAN" },
+                    { char: "o", category: "VERIFIED_HUMAN" },
+                    { char: "m", category: "VERIFIED_HUMAN" },
+                    { char: "p", category: "VERIFIED_HUMAN" },
+                    { char: "a", category: "VERIFIED_HUMAN" },
+                    { char: "n", category: "VERIFIED_HUMAN" },
+                    { char: "y", category: "VERIFIED_HUMAN" },
+                    { char: " ", category: "VERIFIED_HUMAN" },
+                    { char: "n", category: "LIKELY_PASTED" },
+                    { char: "a", category: "LIKELY_PASTED" },
+                    { char: "m", category: "LIKELY_PASTED" },
+                    { char: "e", category: "LIKELY_PASTED" },
+                    { char: " ", category: "LIKELY_PASTED" },
+                    { char: "G", category: "LIKELY_PASTED" },
+                    { char: "o", category: "LIKELY_PASTED" },
+                    { char: "o", category: "LIKELY_PASTED" },
+                    { char: "g", category: "LIKELY_PASTED" },
+                    { char: "l", category: "LIKELY_PASTED" },
+                    { char: "e", category: "LIKELY_PASTED" },
+                    { char: " ", category: "LIKELY_PASTED" },
+                    { char: "h", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: "r", category: "VERIFIED_HUMAN" },
+                    { char: "e", category: "VERIFIED_HUMAN" },
+                    { char: ".", category: "VERIFIED_HUMAN" }
+                ]
             },
             {
-                id: 'confidence-range',
-                name: 'Confidence Score Range',
-                description: 'Confidence score should be between 0 and 1',
-                input: 'Another test for confidence validation',
-                expectedConfidenceMin: 0,
-                expectedConfidenceMax: 1
+                id: 'unknown',
+                name: 'Unknown Text Category',
+                description: 'Text that\'s not in the keystroke database (unknown origin).',
+                matched: 'This text has an unknown origin.',
+                categorization: [
+                    { char: "T", category: "UNKNOWN" },
+                    { char: "h", category: "UNKNOWN" },
+                    { char: "i", category: "UNKNOWN" },
+                    { char: "s", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "t", category: "UNKNOWN" },
+                    { char: "e", category: "UNKNOWN" },
+                    { char: "x", category: "UNKNOWN" },
+                    { char: "t", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "h", category: "UNKNOWN" },
+                    { char: "a", category: "UNKNOWN" },
+                    { char: "s", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "a", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "u", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: "k", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: "o", category: "UNKNOWN" },
+                    { char: "w", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: " ", category: "UNKNOWN" },
+                    { char: "o", category: "UNKNOWN" },
+                    { char: "r", category: "UNKNOWN" },
+                    { char: "i", category: "UNKNOWN" },
+                    { char: "g", category: "UNKNOWN" },
+                    { char: "i", category: "UNKNOWN" },
+                    { char: "n", category: "UNKNOWN" },
+                    { char: ".", category: "UNKNOWN" }
+                ]
+            },
+            {
+                id: 'ai',
+                name: 'AI-Generated Text',
+                description: 'Text flagged as AI-generated.',
+                matched: 'The synergistic paradigm facilitates holistic optimization of multifaceted operational modalities.',
+                categorization: [
+                    { char: "T", category: "AI_GENERATED" },
+                    { char: "h", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: "y", category: "AI_GENERATED" },
+                    { char: "n", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "r", category: "AI_GENERATED" },
+                    { char: "g", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "c", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "p", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "r", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "d", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "g", category: "AI_GENERATED" },
+                    { char: "m", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "f", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "c", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "h", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "c", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "p", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "m", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "z", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "n", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "f", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "m", category: "AI_GENERATED" },
+                    { char: "u", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "f", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "c", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "d", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "p", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "r", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "n", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: " ", category: "AI_GENERATED" },
+                    { char: "m", category: "AI_GENERATED" },
+                    { char: "o", category: "AI_GENERATED" },
+                    { char: "d", category: "AI_GENERATED" },
+                    { char: "a", category: "AI_GENERATED" },
+                    { char: "l", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "t", category: "AI_GENERATED" },
+                    { char: "i", category: "AI_GENERATED" },
+                    { char: "e", category: "AI_GENERATED" },
+                    { char: "s", category: "AI_GENERATED" },
+                    { char: ".", category: "AI_GENERATED" }
+                ]
             }
         ];
 
-        // Render test cases
+        function getCategoryColor(category) {
+            switch (category) {
+                case 'VERIFIED_HUMAN': return '#d4edda';
+                case 'LIKELY_PASTED': return '#f8d7da';
+                case 'UNKNOWN': return '#e7e9ec';
+                case 'AI_GENERATED': return '#fff3cd';
+                default: return '#f0f0f0';
+            }
+        }
+
         function renderTestCases() {
-            const container = document.getElementById('testCases');
-            container.innerHTML = testCases.map(test => `
-                <div class="test-case" id="test-${test.id}">
-                    <div class="test-header">
-                        <div class="test-title">${test.name}</div>
-                        <button class="test-button" onclick="runTest('${test.id}')">Run Test</button>
+            const container = document.getElementById('testContainer');
+            container.innerHTML = testCases.map(test => {
+                const coloredText = test.categorization.map(item =>
+                    `<span style="background-color: ${getCategoryColor(item.category)}; padding: 2px 1px; display: inline-block;">${item.char === ' ' ? '&nbsp;' : item.char}</span>`
+                ).join('');
+
+                return `
+                    <div class="test-case">
+                        <h2>${test.name}</h2>
+                        <p class="test-description">${test.description}</p>
+                        <div class="categorized-content">${coloredText}</div>
                     </div>
-                    <p style="color: #666; font-size: 0.9rem;">${test.description}</p>
-                    <div class="test-status"></div>
-                    <div class="result-details"></div>
-                </div>
-            `).join('');
-        }
-
-        // Run single test
-        async function runTest(testId) {
-            const testCase = testCases.find(t => t.id === testId);
-            const testEl = document.getElementById(`test-${testId}`);
-            if (!testCase || !testEl) return;
-
-            // Set running state
-            testEl.classList.remove('passed', 'failed');
-            testEl.classList.add('running');
-            const statusEl = testEl.querySelector('.test-status');
-            statusEl.className = 'test-status status-running';
-            statusEl.innerHTML = '⏳ Running...';
-
-            try {
-                const response = await fetch('/api/v1/keystroke/verify', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ document_text: testCase.input })
-                });
-
-                if (!response.ok) {
-                    throw new Error(`HTTP ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                // Validate response
-                let passed = true;
-                let details = [];
-
-                // Check required fields
-                if (testCase.expectedFields) {
-                    for (const field of testCase.expectedFields) {
-                        if (!(field in data)) {
-                            passed = false;
-                            details.push(`❌ Missing field: ${field}`);
-                        } else {
-                            details.push(`✓ Field present: ${field}`);
-                        }
-                    }
-                }
-
-                // Check verdict
-                if (testCase.expectedVerdictIn) {
-                    if (testCase.expectedVerdictIn.includes(data.can_prove_human)) {
-                        details.push(`✓ Verdict "${data.can_prove_human}" is expected`);
-                    } else {
-                        passed = false;
-                        details.push(`❌ Verdict "${data.can_prove_human}" not in ${testCase.expectedVerdictIn}`);
-                    }
-                }
-
-                // Check confidence range
-                if (testCase.expectedConfidenceMin !== undefined) {
-                    if (data.confidence >= testCase.expectedConfidenceMin) {
-                        details.push(`✓ Confidence ${data.confidence} >= ${testCase.expectedConfidenceMin}`);
-                    } else {
-                        passed = false;
-                        details.push(`❌ Confidence ${data.confidence} < ${testCase.expectedConfidenceMin}`);
-                    }
-                }
-
-                if (testCase.expectedConfidenceMax !== undefined) {
-                    if (data.confidence <= testCase.expectedConfidenceMax) {
-                        details.push(`✓ Confidence ${data.confidence} <= ${testCase.expectedConfidenceMax}`);
-                    } else {
-                        passed = false;
-                        details.push(`❌ Confidence ${data.confidence} > ${testCase.expectedConfidenceMax}`);
-                    }
-                }
-
-                if (testCase.expectedConfidenceLessThan !== undefined) {
-                    if (data.confidence < testCase.expectedConfidenceLessThan) {
-                        details.push(`✓ Confidence ${data.confidence} < ${testCase.expectedConfidenceLessThan}`);
-                    } else {
-                        details.push(`⚠ Confidence ${data.confidence} >= ${testCase.expectedConfidenceLessThan}`);
-                    }
-                }
-
-                // Update UI
-                testEl.classList.remove('running');
-                if (passed) {
-                    testEl.classList.add('passed');
-                    statusEl.className = 'test-status status-passed';
-                    statusEl.innerHTML = `✅ PASSED`;
-                } else {
-                    testEl.classList.add('failed');
-                    statusEl.className = 'test-status status-failed';
-                    statusEl.innerHTML = `❌ FAILED`;
-                }
-
-                const detailsEl = testEl.querySelector('.result-details');
-                detailsEl.innerHTML = details.map(d => `<div>${d}</div>`).join('');
-
-            } catch (error) {
-                testEl.classList.remove('running');
-                testEl.classList.add('failed');
-                const statusEl = testEl.querySelector('.test-status');
-                statusEl.className = 'test-status status-failed';
-                statusEl.innerHTML = `❌ ERROR: ${error.message}`;
-            }
-        }
-
-        // Run all tests
-        async function runAllTests() {
-            for (const test of testCases) {
-                await runTest(test.id);
-                await new Promise(resolve => setTimeout(resolve, 500)); // Small delay between tests
-            }
-        }
-
-        // Clear all results
-        function clearAllResults() {
-            testCases.forEach(test => {
-                const testEl = document.getElementById(`test-${test.id}`);
-                if (testEl) {
-                    testEl.classList.remove('passed', 'failed', 'running');
-                    testEl.querySelector('.test-status').innerHTML = '';
-                    testEl.querySelector('.result-details').innerHTML = '';
-                }
-            });
+                `;
+            }).join('');
         }
 
         // Initialize
