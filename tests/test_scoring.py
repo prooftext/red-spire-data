@@ -1,5 +1,5 @@
 import pytest
-from app.services.scoring import calculate_human_score, determine_status
+from app.services.scoring import calculate_human_score, determine_status, calculate_transcription_likelihood
 from app.services.features import extract_metrics
 from app.models.requests import KeystrokeEvent
 from datetime import datetime
@@ -43,6 +43,59 @@ def test_determine_status_maps_probabilities_correctly():
     
     # Low probability → "no"
     assert determine_status(0.3) == "no"
+
+
+def test_calculate_transcription_likelihood_requires_min_samples():
+    """Transcription likelihood should be unavailable when timing sample count is too low."""
+    metrics = {
+        "totalKeystrokes": 40,
+        "timingSampleCount": 40,
+        "backspaceCount": 0,
+        "pausesOver2Sec": 0,
+        "longestPauseMicros": 400000,
+        "stdDwellTimeMicros": 3000,
+        "stdFlightTimeMicros": 9000,
+        "pasteRatio": 0.0,
+    }
+
+    score = calculate_transcription_likelihood(metrics)
+    assert score is None
+
+
+def test_transcription_like_metrics_score_high():
+    """Steady, low-correction typing should produce a high transcription likelihood."""
+    metrics = {
+        "totalKeystrokes": 120,
+        "timingSampleCount": 120,
+        "backspaceCount": 0,
+        "pausesOver2Sec": 0,
+        "longestPauseMicros": 500000,
+        "stdDwellTimeMicros": 2500,
+        "stdFlightTimeMicros": 7000,
+        "pasteRatio": 0.0,
+    }
+
+    score = calculate_transcription_likelihood(metrics)
+    assert score is not None
+    assert score >= 0.9
+
+
+def test_composition_like_metrics_score_lower_for_transcription():
+    """More variable, correction-heavy typing should score lower for transcription."""
+    metrics = {
+        "totalKeystrokes": 120,
+        "timingSampleCount": 120,
+        "backspaceCount": 12,
+        "pausesOver2Sec": 8,
+        "longestPauseMicros": 2500000,
+        "stdDwellTimeMicros": 16000,
+        "stdFlightTimeMicros": 35000,
+        "pasteRatio": 0.0,
+    }
+
+    score = calculate_transcription_likelihood(metrics)
+    assert score is not None
+    assert score <= 0.3
 
 def test_extract_metrics_empty_events_returns_empty_dict():
     """No keystroke events should return no metrics"""

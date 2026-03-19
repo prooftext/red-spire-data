@@ -11,7 +11,7 @@ class KeystrokeEvent(BaseModel):
     releaseTime: Optional[datetime] = Field(None, description="When the key was released")
     dwellTimeMicros: Optional[int] = Field(None, description="Duration key was held (microseconds)")
     flightTimeMicros: Optional[int] = Field(None, description="Time between releasing this key and next (microseconds)")
-    cursorPosition: Optional[int] = Field(None, description="Position in document where event occurred")
+    cursorPosition: Optional[int] = Field(None, description="Optional position in document where event occurred (inferred from event timing/order when omitted)")
     sequence: int = Field(..., description="Sequential number for ordering events")
     pastedLength: Optional[int] = Field(None, description="Number of characters pasted")
     pastedText: Optional[str] = Field(None, description="The actual text that was pasted (required for accurate paste detection)")

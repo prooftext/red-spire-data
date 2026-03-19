@@ -140,13 +140,133 @@ def _parse_timestamp(value: str | None) -> datetime | None:
         return None
 
 
-def extract_segment_metrics(events: List[dict], start: int, end: int) -> dict:
-    keydown_events = []
-    for event in events:
+def _to_int(value) -> int | None:
+    if value is None:
+        return None
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
+
+
+def _is_printable_key(key: str | None) -> bool:
+    return isinstance(key, str) and len(key) == 1 and key.isprintable()
+
+
+def _flatten_keystroke_positions(keystroke_spans: List[Tuple[int, int]], doc_length: int) -> List[int]:
+    positions: List[int] = []
+    for start, end in keystroke_spans:
+        safe_start = max(0, start)
+        safe_end = min(end, doc_length)
+        if safe_start < safe_end:
+            positions.extend(range(safe_start, safe_end))
+    return positions
+
+
+def _prepare_events_with_inferred_cursor(
+    full_document: str,
+    events: List[dict],
+    keystroke_spans: List[Tuple[int, int]],
+) -> List[dict]:
+    """
+    Normalize events and infer cursor positions when cursorPosition is missing.
+
+    Inference is based on chronological event order (timestamp + sequence), then
+    aligned to keystroke spans reconstructed from typed characters.
+    """
+    doc_length = len(full_document)
+    typed_positions = _flatten_keystroke_positions(keystroke_spans, doc_length)
+
+    prepared = []
+    for index, event in enumerate(events):
         event_type, event_data = _parse_event_data(event)
+        sequence = _to_int(
+            event_data.get('sequence')
+            or event.get('sequence_number')
+            or event.get('sequence')
+        )
+        timestamp = _parse_timestamp(
+            event_data.get('timestamp')
+            or event_data.get('pressTime')
+            or event.get('event_time')
+        )
+        explicit_cursor = _to_int(event_data.get('cursorPosition'))
+
+        prepared.append({
+            'event_type': event_type,
+            'event_data': event_data,
+            'sequence': sequence,
+            'timestamp': timestamp,
+            'index': index,
+            'cursor_position': explicit_cursor,
+        })
+
+    prepared.sort(
+        key=lambda item: (
+            0 if item['timestamp'] is not None else 1,
+            item['timestamp'].timestamp() if item['timestamp'] is not None else 0.0,
+            0 if item['sequence'] is not None else 1,
+            item['sequence'] if item['sequence'] is not None else 0,
+            item['index'],
+        )
+    )
+
+    cursor = 0
+    typed_index = 0
+    max_key_cursor = max(0, doc_length - 1)
+
+    for item in prepared:
+        event_type = item['event_type']
+        event_data = item['event_data']
+        key = event_data.get('key')
+        cursor_pos = item.get('cursor_position')
+
+        if cursor_pos is None:
+            if event_type == 'keydown' and _is_printable_key(key):
+                if typed_index < len(typed_positions):
+                    cursor_pos = typed_positions[typed_index]
+                else:
+                    cursor_pos = min(cursor, max_key_cursor)
+                typed_index += 1
+                cursor = min(doc_length, cursor_pos + 1)
+            elif event_type == 'keydown' and key == 'Backspace':
+                cursor = max(0, cursor - 1)
+                cursor_pos = cursor
+            elif event_type == 'keydown' and key == 'Delete':
+                cursor_pos = cursor
+            elif event_type == 'navigation':
+                if key in {'ArrowLeft', 'Left'}:
+                    cursor = max(0, cursor - 1)
+                elif key in {'ArrowRight', 'Right'}:
+                    cursor = min(doc_length, cursor + 1)
+                elif key == 'Home':
+                    cursor = 0
+                elif key == 'End':
+                    cursor = doc_length
+                cursor_pos = cursor
+            elif event_type == 'paste':
+                cursor_pos = cursor
+                pasted_text = event_data.get('pastedText')
+                if isinstance(pasted_text, str) and pasted_text:
+                    cursor = min(doc_length, cursor + len(pasted_text))
+            else:
+                cursor_pos = cursor
+        else:
+            cursor = min(doc_length, max(0, cursor_pos))
+
+        item['cursor_position'] = max(0, cursor_pos)
+
+    return prepared
+
+
+def extract_segment_metrics(events_with_cursor: List[dict], start: int, end: int) -> dict:
+    keydown_events = []
+    for event in events_with_cursor:
+        event_type = event.get('event_type', '')
+        event_data = event.get('event_data', {})
         if event_type != 'keydown':
             continue
-        cursor_pos = event_data.get('cursorPosition')
+        cursor_pos = event.get('cursor_position')
         if cursor_pos is None:
             continue
         if start <= cursor_pos < end:
@@ -164,8 +284,10 @@ def extract_segment_metrics(events: List[dict], start: int, end: int) -> dict:
     flight_times = []
     for i in range(len(timestamps) - 1):
         flight_time = keydown_events[i + 1].get('flightTimeMicros')
-        if flight_time is None and timestamps[i] and timestamps[i + 1]:
-            time_diff_seconds = (timestamps[i + 1] - timestamps[i]).total_seconds()
+        current_timestamp = timestamps[i]
+        next_timestamp = timestamps[i + 1]
+        if flight_time is None and current_timestamp is not None and next_timestamp is not None:
+            time_diff_seconds = (next_timestamp - current_timestamp).total_seconds()
             flight_time = int(time_diff_seconds * 1_000_000)
 
         if flight_time is None:
@@ -225,19 +347,28 @@ def create_text_segments(
     # Map character positions to their source
     char_source = ['unknown'] * len(full_document)
     pasted_texts = {}  # Map of position -> pasted text for pasted content
+
+    # Build keystroke spans and infer cursor locations for events that don't provide them
+    keystroke_spans = identify_keystroke_spans(full_document, reconstruct_text_from_keystrokes(events))
+    prepared_events = _prepare_events_with_inferred_cursor(full_document, events, keystroke_spans)
     
     # Extract all pasted text segments
-    for event in events:
-        event_type, event_data = _parse_event_data(event)
+    for event in prepared_events:
+        event_type = event.get('event_type', '')
+        event_data = event.get('event_data', {})
         
         if event_type == 'paste' and event_data:
             # event_data is a dict with pastedText
             pasted_text = event_data.get('pastedText')
             cursor_pos = event_data.get('cursorPosition')
+            if cursor_pos is None:
+                cursor_pos = event.get('cursor_position')
             
             if pasted_text and cursor_pos is not None:
                 # Find where this pasted text appears in the document starting from cursor position
                 pasted_start = full_document.find(pasted_text, cursor_pos)
+                if pasted_start == -1:
+                    pasted_start = full_document.find(pasted_text)
                 if pasted_start != -1:
                     pasted_end = pasted_start + len(pasted_text)
                     for i in range(pasted_start, min(pasted_end, len(full_document))):
@@ -252,8 +383,6 @@ def create_text_segments(
                         char_source[i] = 'pasted'
                     pasted_texts[pasted_start] = (pasted_end, pasted_text)
     
-    # Extract keystroke positions
-    keystroke_spans = identify_keystroke_spans(full_document, reconstruct_text_from_keystrokes(events))
     for start, end in keystroke_spans:
         for i in range(start, min(end, len(full_document))):
             char_source[i] = 'keystroke'
@@ -272,7 +401,7 @@ def create_text_segments(
             
             # Determine category based on source
             if current_source == 'keystroke':
-                segment_metrics = extract_segment_metrics(events, current_start, i)
+                segment_metrics = extract_segment_metrics(prepared_events, current_start, i)
                 segment_transcription = None
                 if segment_metrics:
                     segment_transcription = calculate_transcription_likelihood(segment_metrics)

@@ -48,7 +48,7 @@ async def test_verify_identifies_pasted_text(db_pool):
             # Paste "World"
             KeystrokeEvent(
                 eventType="paste", timestamp=datetime(2023, 1, 1, 0, 0, 1),
-                pastedText="World", cursorPosition=6, sequence=7
+                pastedText="World", sequence=7
             ),
         ]
         

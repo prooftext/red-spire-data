@@ -254,6 +254,55 @@
             font-weight: 600;
         }
 
+        .transcribed-summary {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #eaf4ff;
+            border: 1px solid #bcd8f2;
+            border-left: 4px solid #1e6bb8;
+            border-radius: 4px;
+        }
+
+        .transcribed-summary h5 {
+            margin: 0 0 0.5rem 0;
+            color: #0b3d91;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .transcribed-summary p {
+            margin-bottom: 0.75rem;
+            color: #1e3a5f;
+            font-size: 0.85rem;
+        }
+
+        .transcribed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .transcribed-item {
+            background: white;
+            border: 1px solid #d6e7f8;
+            border-radius: 4px;
+            padding: 0.75rem;
+        }
+
+        .transcribed-item-meta {
+            color: #0b3d91;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-bottom: 0.35rem;
+        }
+
+        .transcribed-item-text {
+            color: #1f2937;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
         .category-legend {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -548,6 +597,14 @@
             // Display categorized text if available
             if (document_text && text_categorization && text_categorization.length > 0) {
                 contentHTML += generateCategorizedTextHTML(document_text, text_categorization, searchQuery);
+
+                const transcribedSegments = Array.isArray(text_categorization)
+                    ? text_categorization.filter(item => (item.category || '').toUpperCase() === 'LIKELY_TRANSCRIBED')
+                    : [];
+
+                if (transcribedSegments.length > 0) {
+                    contentHTML += generateTranscribedSummaryHTML(transcribedSegments);
+                }
             } else if (document_text) {
                 contentHTML += '<p style="color: #666; padding: 1rem; background: #f9f9f9; border-radius: 4px;">Text was found but no categorization data available.</p>';
             }
@@ -598,6 +655,27 @@
 
             html += '</div></div>';
 
+            return html;
+        }
+
+        function generateTranscribedSummaryHTML(transcribedSegments) {
+            let html = '<div class="transcribed-summary">';
+            html += '<h5>Detected Transcribed Sections</h5>';
+            html += '<p>These spans were typed but match transcription-like behavior patterns.</p>';
+            html += '<div class="transcribed-list">';
+
+            transcribedSegments.forEach((segment, index) => {
+                const start = Number.isInteger(segment.start) ? segment.start : 0;
+                const end = Number.isInteger(segment.end) ? segment.end : start;
+                const snippet = escapeHtml(segment.text || '');
+
+                html += '<div class="transcribed-item">';
+                html += `<div class="transcribed-item-meta">Segment ${index + 1} (chars ${start}-${end})</div>`;
+                html += `<div class="transcribed-item-text">${snippet}</div>`;
+                html += '</div>';
+            });
+
+            html += '</div></div>';
             return html;
         }
 

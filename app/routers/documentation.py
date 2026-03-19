@@ -29,7 +29,7 @@ SUPPORTED_EVENT_TYPES = [
             "timestamp": "When the key was pressed (ISO 8601 format)",
             "dwellTimeMicros": "How long the key was held down in microseconds",
             "flightTimeMicros": "Time between releasing this key and pressing the next (microseconds)",
-            "cursorPosition": "Position in the document where this key was inserted",
+            "cursorPosition": "Optional position in the document where this key was inserted (inferred from timestamp+sequence when omitted)",
             "sequence": "Sequential number for ordering events",
             "modifiers": "Keys held during the keypress (e.g., Shift, Ctrl, Alt)"
         },
@@ -40,7 +40,6 @@ SUPPORTED_EVENT_TYPES = [
             "timestamp": "2026-02-19T10:30:45.123Z",
             "dwellTimeMicros": 150000,
             "flightTimeMicros": 85000,
-            "cursorPosition": 0,
             "sequence": 1,
             "modifiers": None
         }
@@ -52,7 +51,7 @@ SUPPORTED_EVENT_TYPES = [
             "pastedText": "The actual text that was pasted (required for text analysis)",
             "pastedLength": "Number of characters pasted",
             "timestamp": "When the paste occurred (ISO 8601 format)",
-            "cursorPosition": "Position in the document where the paste was inserted",
+            "cursorPosition": "Optional position where the paste was inserted (inferred from timestamp+sequence when omitted)",
             "sequence": "Sequential number for ordering events"
         },
         example={
@@ -60,7 +59,6 @@ SUPPORTED_EVENT_TYPES = [
             "pastedText": "Hello World",
             "pastedLength": 11,
             "timestamp": "2026-02-19T10:30:46.500Z",
-            "cursorPosition": 5,
             "sequence": 2
         }
     ),
@@ -70,14 +68,13 @@ SUPPORTED_EVENT_TYPES = [
         fields={
             "deletedLength": "Number of characters deleted",
             "timestamp": "When the deletion occurred",
-            "cursorPosition": "Position where the deletion happened",
+            "cursorPosition": "Optional position where the deletion happened (inferred from timestamp+sequence when omitted)",
             "sequence": "Sequential number for ordering events"
         },
         example={
             "eventType": "delete",
             "deletedLength": 3,
             "timestamp": "2026-02-19T10:30:47.000Z",
-            "cursorPosition": 8,
             "sequence": 3
         }
     ),
@@ -105,7 +102,7 @@ SUPPORTED_EVENT_TYPES = [
             "key": "The navigation key pressed ('PageUp', 'PageDown', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight')",
             "keyCode": "The numeric key code",
             "timestamp": "When the navigation key was pressed (ISO 8601 format)",
-            "cursorPosition": "Position in the document after navigation",
+            "cursorPosition": "Optional position in the document after navigation (inferred from timestamp+sequence when omitted)",
             "sequence": "Sequential number for ordering events",
             "modifiers": "Keys held during the navigation (e.g., Shift, Ctrl, Alt)"
         },
@@ -114,7 +111,6 @@ SUPPORTED_EVENT_TYPES = [
             "key": "ArrowDown",
             "keyCode": 40,
             "timestamp": "2026-02-19T10:30:48.000Z",
-            "cursorPosition": 10,
             "sequence": 5,
             "modifiers": None
         }
@@ -171,7 +167,7 @@ async def get_api_schema():
                     "For paste events, always include pastedText field",
                     "Maintain sequence numbering for proper event ordering",
                     "Include accurate timestamps in ISO 8601 format",
-                    "cursorPosition helps identify where pasted text was inserted"
+                    "cursorPosition is optional; cursor location is inferred from timestamp and sequence when omitted"
                 ]
             },
             "verify": {

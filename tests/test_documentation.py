@@ -92,5 +92,37 @@ async def test_navigation_event_documentation(db_pool):
         assert example["eventType"] == "navigation"
         assert example["key"] in ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight", "PageUp", "PageDown"]
         assert "keyCode" in example
-        assert "cursorPosition" in example
+
+
+@pytest.mark.asyncio
+async def test_cursor_position_documented_as_optional(db_pool):
+    """cursorPosition should be documented as optional/inferred across relevant event types."""
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        response = await client.get("/api/v1/keystroke/event-types")
+
+        assert response.status_code == 200
+        event_types = response.json()
+
+        for name in ["keydown", "paste", "delete", "navigation"]:
+            event_doc = next((e for e in event_types if e["name"] == name), None)
+            assert event_doc is not None
+            assert "cursorPosition" in event_doc["fields"]
+            description = event_doc["fields"]["cursorPosition"].lower()
+            assert "optional" in description
+            assert "inferred" in description
+
+
+@pytest.mark.asyncio
+async def test_api_schema_notes_cursor_position_optional(db_pool):
+    """API schema notes should state that cursorPosition is optional and inferred."""
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        response = await client.get("/api/v1/keystroke/api-schema")
+
+        assert response.status_code == 200
+        schema = response.json()
+        notes = schema["endpoints"]["collect"]["important_notes"]
+        combined_notes = " ".join(notes).lower()
+        assert "cursorposition" in combined_notes
+        assert "optional" in combined_notes
+        assert "inferred" in combined_notes
 
