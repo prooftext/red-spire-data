@@ -12,6 +12,14 @@ Server code for the Prooftext keystroke biometrics authentication system.
 poetry install
 ```
 
+Default install excludes optional AI detector dependencies (`spacy`, `transformers`, `torch`) to keep backend builds lightweight.
+
+If you want detector-comparison features enabled locally, install with:
+
+```bash
+poetry install --with detectors
+```
+
 ## Running Tests
 
 To run the test suite with a local postgres database:
