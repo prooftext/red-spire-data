@@ -32,6 +32,9 @@ poetry run pytest -v
 - Managed by: Render platform
 - Lifecycle: Persistent, shared with production
 
+Current replacement database:
+- Connection: `postgresql://prooftext_db_28ip_user:KuDAiPqw90nMJpgjhUmNhhRmfrj3Apql@dpg-d7g81inlk1mc7382b8lg-a.oregon-postgres.render.com/prooftext_db_28ip`
+
 **Run command:**
 ```bash
 poetry run pytest tests/test_live_server.py -v
