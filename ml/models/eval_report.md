@@ -7,7 +7,7 @@
 ## User Verification
 - ROC-AUC: 0.7667
 - EER: 0.1591
-- EER Threshold: 0.9799
+- EER Threshold: 0.9899
 
 ## Sources
 - fixtures: 3 sessions

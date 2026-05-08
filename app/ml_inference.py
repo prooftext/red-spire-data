@@ -3,25 +3,21 @@ from __future__ import annotations
 import logging
 from pathlib import Path
 
-import pandas as pd
-import torch
-
-from ml.src.infer import InferenceBundle, _events_to_df
-from ml.src.feature_extraction import build_aggregate_features
-
-
 logger = logging.getLogger(__name__)
 
 
 class MLInferenceService:
     def __init__(self, production_dir: Path):
         self.production_dir = production_dir
-        self.bundle: InferenceBundle | None = None
+        self.bundle = None
         self.available = False
         self.model_version = "unavailable"
+        self._import_error: str | None = None
 
     def load(self) -> None:
         try:
+            from ml.src.infer import InferenceBundle
+
             self.bundle = InferenceBundle(self.production_dir)
             self.available = True
             self.model_version = str(self.bundle.metadata.get("model_version", "unknown"))
@@ -29,6 +25,7 @@ class MLInferenceService:
         except Exception as exc:
             self.available = False
             self.bundle = None
+            self._import_error = str(exc)
             logger.warning("ML inference bundle unavailable: %s", exc)
 
     def score_session(self, events: list[dict], document_text: str, user_id: str | None = None, enrolled_template: list[float] | None = None) -> dict:
@@ -55,6 +52,16 @@ class MLInferenceService:
 
     def compute_session_embedding(self, events: list[dict], document_text: str, user_id: str | None = None) -> list[float] | None:
         if not self.available or not self.bundle:
+            return None
+
+        try:
+            import pandas as pd
+            import torch
+
+            from ml.src.infer import _events_to_df
+            from ml.src.feature_extraction import build_aggregate_features
+        except Exception as exc:
+            logger.warning("ML embedding dependencies unavailable: %s", exc)
             return None
 
         sid = "embed_live"

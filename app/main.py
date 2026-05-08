@@ -7,6 +7,7 @@ from pathlib import Path
 from app.database import init_db, close_db
 from app.routers import collect, verify, documentation
 from app.routers import analytics
+from app.routers import ml_routes
 from app.routers import sessions as sessions_router
 from app.ml_inference import load_models_once
 
@@ -33,6 +34,7 @@ app.include_router(verify.router, prefix="/api/v1/keystroke", tags=["verify"])
 app.include_router(sessions_router.router, prefix="/api/v1/keystroke", tags=["sessions"])
 app.include_router(documentation.router, prefix="/api/v1/keystroke", tags=["documentation"])
 app.include_router(analytics.router, prefix="/api/v1/keystroke", tags=["analytics"])
+app.include_router(ml_routes.router, prefix="/api/v1/keystroke", tags=["ml"])
 
 # Serve static files
 static_dir = Path(__file__).parent.parent / "static"

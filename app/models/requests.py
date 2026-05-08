@@ -29,3 +29,11 @@ class CollectRequest(BaseModel):
 
 class VerifyRequest(BaseModel):
     document_text: str
+
+
+class ScoreSessionRequest(BaseModel):
+    document_text: str
+    events: List[KeystrokeEvent]
+    user_id: Optional[str] = None
+    session_id: Optional[str] = None
+    include_segments: bool = True

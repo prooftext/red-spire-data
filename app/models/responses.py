@@ -39,3 +39,13 @@ class SessionMetadata(BaseModel):
 class LastSessionResponse(BaseModel):
     document_id: str
     session_id: Optional[str] = None
+
+
+class MLScoreResponse(BaseModel):
+    mode: str
+    mode_confidence: float
+    mode_probs: dict
+    user_match: dict
+    signals: dict
+    segments: Optional[list] = None
+    model_version: Optional[str] = None

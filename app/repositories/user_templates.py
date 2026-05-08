@@ -1,8 +1,7 @@
 import json
+import math
 from typing import Any
 from uuid import UUID
-
-import numpy as np
 
 
 def ensure_uuid(value):
@@ -55,14 +54,39 @@ async def fetch_user_template_centroid(conn, user_id: str, model_version: str | 
     if not rows:
         return None
 
-    vecs = [np.array(r[0], dtype=float) for r in rows if r and r[0]]
+    vecs: list[list[float]] = []
+    for r in rows:
+        if not r or not r[0]:
+            continue
+        try:
+            vecs.append([float(x) for x in r[0]])
+        except Exception:
+            continue
+
     if not vecs:
         return None
-    centroid = np.mean(np.vstack(vecs), axis=0)
-    norm = np.linalg.norm(centroid)
+
+    dim = len(vecs[0])
+    if dim == 0:
+        return None
+
+    sums = [0.0] * dim
+    used = 0
+    for v in vecs:
+        if len(v) != dim:
+            continue
+        used += 1
+        for i, val in enumerate(v):
+            sums[i] += val
+
+    if used == 0:
+        return None
+
+    centroid = [s / used for s in sums]
+    norm = math.sqrt(sum(x * x for x in centroid))
     if norm > 0:
-        centroid = centroid / norm
-    return centroid.tolist()
+        centroid = [x / norm for x in centroid]
+    return centroid
 
 
 async def insert_user_template(

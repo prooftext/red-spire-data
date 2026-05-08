@@ -1,9 +1,9 @@
 {
   "pair_roc_auc": 0.8,
   "eer": 0.16666666666666666,
-  "eer_threshold": 0.4572864321608041,
+  "eer_threshold": 0.5778894472361809,
   "pair_trials": 6,
   "users": 3,
   "sessions": 12,
-  "train_loss_final": 0.458376944065094
+  "train_loss_final": 0.42605724930763245
 }
