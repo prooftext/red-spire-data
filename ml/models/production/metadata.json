@@ -1,6 +1,6 @@
 {
-  "model_version": "v20260508075935",
-  "created_at_utc": "2026-05-08T07:59:35.226882+00:00",
+  "model_version": "v20260508080613",
+  "created_at_utc": "2026-05-08T08:06:13.096012+00:00",
   "input_schema_version": "keystroke-event-v1",
   "mode_labels": [
     "original",

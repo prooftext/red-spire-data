@@ -29,6 +29,7 @@ class CollectRequest(BaseModel):
 
 class VerifyRequest(BaseModel):
     document_text: str
+    top_k: int = 5
 
 
 class ScoreSessionRequest(BaseModel):

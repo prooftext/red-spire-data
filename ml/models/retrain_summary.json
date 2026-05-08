@@ -1,0 +1,13 @@
+{
+  "export_summary": {
+    "sessions_rows": 5,
+    "events_rows": 926,
+    "sessions_path": "/mnt/c/Users/Avi/code/prooftext/red-spire-data/ml/processed/prod_sessions.parquet",
+    "events_path": "/mnt/c/Users/Avi/code/prooftext/red-spire-data/ml/processed/prod_events.parquet",
+    "seed_templates_path": "/mnt/c/Users/Avi/code/prooftext/red-spire-data/ml/processed/user_templates_seed.parquet"
+  },
+  "mode_macro_f1": 1.0,
+  "user_eer": 0.12087912087912087,
+  "published": true,
+  "decision_reason": "first_model"
+}

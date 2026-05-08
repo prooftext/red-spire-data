@@ -348,6 +348,11 @@
             border-color: #ffc107;
         }
 
+        .legend-color.not-in-system {
+            background-color: #f3e8ff;
+            border-color: #7e22ce;
+        }
+
         .legend-color.transcribed {
             background-color: #cfe8ff;
             border-color: #1e6bb8;
@@ -384,6 +389,12 @@
 
         span.category-likely-transcribed {
             background-color: #cfe8ff !important;
+            padding: 0.2rem 0.1rem !important;
+            display: inline-block;
+        }
+
+        span.category-not-in-system {
+            background-color: #f3e8ff !important;
             padding: 0.2rem 0.1rem !important;
             display: inline-block;
         }
@@ -545,8 +556,11 @@
         });
 
         function displayResult(data) {
-            const { can_prove_human, confidence, session_id, username, document_text, text_categorization, transcription_likelihood, model_ready } = data;
+            const { can_prove_human, confidence, document_text, text_categorization, transcription_likelihood, model_ready, top_hits } = data;
             const searchQuery = document.getElementById('document_text').value.trim();
+            const hits = Array.isArray(top_hits) && top_hits.length > 0
+                ? top_hits
+                : [{ can_prove_human, confidence, document_text, text_categorization, transcription_likelihood, model_ready, rank: 0 }];
 
             resultSectionEl.classList.add('show');
 
@@ -571,6 +585,9 @@
             statusHTML += '</h3>';
             statusHTML += `<div class="verdict verdict-${can_prove_human}">${can_prove_human.toUpperCase()}</div>`;
             statusHTML += `<p>Confidence: <strong>${(confidence * 100).toFixed(1)}%</strong></p>`;
+            if (hits.length > 1) {
+                statusHTML += `<p><strong>${hits.length}</strong> matching documents found</p>`;
+            }
 
             resultStatusEl.className = `result-status ${statusClass}`;
             resultStatusEl.innerHTML = statusHTML;
@@ -578,78 +595,70 @@
             // Display metadata
             let contentHTML = '';
 
-            if (confidence >= 0) {
+            hits.forEach((hit, idx) => {
+                const hitText = hit.document_text || searchQuery;
+                const hitCategorization = hit.text_categorization || [];
+                contentHTML += `<h3 style="margin: 1rem 0 0.5rem 0; color: #5568d3;">Match ${idx + 1}${typeof hit.rank === 'number' ? ` (rank ${(hit.rank).toFixed(3)})` : ''}</h3>`;
+
                 contentHTML += '<div class="meta-info">';
-                if (username) {
-                    contentHTML += `<div class="meta-item"><span class="meta-label">Submitted by</span><span class="meta-value">${escapeHtml(username)}</span></div>`;
+                if (hit.username) {
+                    contentHTML += `<div class="meta-item"><span class="meta-label">Submitted by</span><span class="meta-value">${escapeHtml(hit.username)}</span></div>`;
                 }
-                contentHTML += `<div class="meta-item"><span class="meta-label">Confidence Score</span><span class="meta-value">${(confidence * 100).toFixed(1)}%</span></div>`;
-                contentHTML += `<div class="meta-item"><span class="meta-label">Text Length</span><span class="meta-value">${document_text ? document_text.length : 0} characters</span></div>`;
-                if (typeof transcription_likelihood === 'number') {
-                    contentHTML += `<div class="meta-item"><span class="meta-label">Transcription Likelihood</span><span class="meta-value">${(transcription_likelihood * 100).toFixed(1)}%</span></div>`;
+                contentHTML += `<div class="meta-item"><span class="meta-label">Confidence Score</span><span class="meta-value">${((hit.confidence || 0) * 100).toFixed(1)}%</span></div>`;
+                contentHTML += `<div class="meta-item"><span class="meta-label">Text Length</span><span class="meta-value">${hitText.length} characters</span></div>`;
+                if (typeof hit.transcription_likelihood === 'number') {
+                    contentHTML += `<div class="meta-item"><span class="meta-label">Transcription Likelihood</span><span class="meta-value">${(hit.transcription_likelihood * 100).toFixed(1)}%</span></div>`;
                 }
-                if (typeof model_ready === 'boolean') {
-                    contentHTML += `<div class="meta-item"><span class="meta-label">Model Readiness</span><span class="meta-value">${model_ready ? 'Ready' : 'Building'}</span></div>`;
+                if (typeof hit.model_ready === 'boolean') {
+                    contentHTML += `<div class="meta-item"><span class="meta-label">Model Readiness</span><span class="meta-value">${hit.model_ready ? 'Ready' : 'Building'}</span></div>`;
                 }
                 contentHTML += '</div>';
-            }
 
-            // Display categorized text if available
-            if (document_text && text_categorization && text_categorization.length > 0) {
-                contentHTML += generateCategorizedTextHTML(document_text, text_categorization, searchQuery);
+                if (hitText && hitCategorization.length > 0) {
+                    contentHTML += generateCategorizedTextHTML(hitText, hitCategorization, searchQuery);
 
-                const transcribedSegments = Array.isArray(text_categorization)
-                    ? text_categorization.filter(item => (item.category || '').toUpperCase() === 'LIKELY_TRANSCRIBED')
-                    : [];
-
-                if (transcribedSegments.length > 0) {
-                    contentHTML += generateTranscribedSummaryHTML(transcribedSegments);
+                    const transcribedSegments = hitCategorization.filter(item => (item.category || '').toUpperCase() === 'LIKELY_TRANSCRIBED');
+                    if (transcribedSegments.length > 0) {
+                        contentHTML += generateTranscribedSummaryHTML(transcribedSegments);
+                    }
+                } else if (hitText) {
+                    contentHTML += '<p style="color: #666; padding: 1rem; background: #f9f9f9; border-radius: 4px;">Text was found but no categorization data available.</p>';
                 }
-            } else if (document_text) {
-                contentHTML += '<p style="color: #666; padding: 1rem; background: #f9f9f9; border-radius: 4px;">Text was found but no categorization data available.</p>';
-            }
+            });
 
             resultContentEl.innerHTML = contentHTML;
         }
 
         function generateCategorizedTextHTML(documentText, categorization, searchQuery) {
             let html = '<div class="diff-box">';
-            html += '<h5>Text Analysis by Source</h5>';
+            html += '<h5>Matched Query Analysis by Source</h5>';
             html += '<div class="category-legend">';
             html += '<div class="legend-item"><div class="legend-color verified"></div><span>✓ Human Verified - Keystroke recorded</span></div>';
             html += '<div class="legend-item"><div class="legend-color pasted"></div><span>📋 Likely Pasted - No keystrokes detected</span></div>';
             html += '<div class="legend-item"><div class="legend-color unknown"></div><span>❓ Unknown - No keystroke data available</span></div>';
             html += '<div class="legend-item"><div class="legend-color ai"></div><span>⚠️ AI Generated</span></div>';
             html += '<div class="legend-item"><div class="legend-color transcribed"></div><span>✍️ Likely Transcribed - Typed from a source</span></div>';
+            html += '<div class="legend-item"><div class="legend-color not-in-system"></div><span>🧩 Not In System - Query text not found in matched record</span></div>';
             html += '</div>';
             html += '<div class="categorized-content">';
 
             if (Array.isArray(categorization)) {
-                // Find the position of the search query in the document
-                const searchLower = searchQuery.toLowerCase();
-                const docLower = documentText.toLowerCase();
-                const queryStart = docLower.indexOf(searchLower);
-                const queryEnd = queryStart + searchQuery.length;
-
                 const categoryLabels = {
                     VERIFIED_HUMAN: 'Human Verified',
                     LIKELY_PASTED: 'Likely Pasted',
                     UNKNOWN: 'Unknown',
                     AI_GENERATED: 'AI Generated',
-                    LIKELY_TRANSCRIBED: 'Likely Transcribed'
+                    LIKELY_TRANSCRIBED: 'Likely Transcribed',
+                    NOT_IN_SYSTEM: 'Not In System'
                 };
 
-                categorization.forEach((item, index) => {
-                    const char = escapeHtml(item.text || item.char || '');
+                categorization.forEach((item) => {
+                    const text = escapeHtml(item.text || item.char || '');
                     const category = (item.category || item.source || 'UNKNOWN').toUpperCase();
                     const categoryClass = 'category-' + category.toLowerCase().replace(/_/g, '-');
 
-                    // Check if this character is part of the search query
-                    const isInQuery = queryStart !== -1 && index >= queryStart && index < queryEnd;
-                    const highlightClass = isInQuery ? ' search-match' : '';
-
                     const label = categoryLabels[category] || category;
-                    html += `<span class="${categoryClass}${highlightClass}" title="${label}">${char}</span>`;
+                    html += `<span class="${categoryClass}" title="${label}">${text}</span>`;
                 });
             }
 

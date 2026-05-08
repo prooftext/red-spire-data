@@ -174,14 +174,20 @@ async def get_api_schema():
                 "path": "/api/v1/keystroke/verify",
                 "method": "POST",
                 "description": "Verify if a document text matches previously collected sessions",
-                "request": "VerifyRequest with document_text",
-                "response": "VerifyResponse with can_prove_human verdict, confidence, and text_categorization",
+                "request": "VerifyRequest with document_text and optional top_k (default 5)",
+                "response": "VerifyResponse with primary hit fields plus ranked top_hits",
                 "text_categorization_fields": {
                     "start": "Start position in document",
                     "end": "End position in document",
-                    "text": "The actual text segment",
-                    "category": "VERIFIED_HUMAN, LIKELY_PASTED, or UNKNOWN",
+                    "text": "The matched query text segment (not full stored document)",
+                    "category": "VERIFIED_HUMAN, LIKELY_PASTED, LIKELY_TRANSCRIBED, AI_GENERATED, UNKNOWN, or NOT_IN_SYSTEM",
                     "source": "keystroke, pasted, or unknown"
+                },
+                "top_hits_fields": {
+                    "rank": "Text search ranking score",
+                    "session_id": "Matched session identifier",
+                    "confidence": "Human-verification confidence for that hit",
+                    "text_categorization": "Snippet-only highlighted segments for the query text"
                 }
             },
             "event-types": {

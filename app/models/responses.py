@@ -11,7 +11,7 @@ class TextSegment(BaseModel):
     start: int  # Start position in document
     end: int    # End position in document
     text: str   # The actual text
-    category: str  # VERIFIED_HUMAN, LIKELY_PASTED, UNKNOWN, AI_GENERATED
+    category: str  # VERIFIED_HUMAN, LIKELY_PASTED, UNKNOWN, AI_GENERATED, LIKELY_TRANSCRIBED, NOT_IN_SYSTEM
     source: Optional[str] = None  # "keystroke", "pasted", "unknown" - more specific than category
 
 class VerifyResponse(BaseModel):
@@ -25,6 +25,7 @@ class VerifyResponse(BaseModel):
     transcription_likelihood: Optional[float] = None
     model_ready: Optional[bool] = None
     detector_results: Optional[list] = None
+    top_hits: Optional[list] = None  # Ranked list of verify hits with snippet categorization
 
 
 class SessionMetadata(BaseModel):

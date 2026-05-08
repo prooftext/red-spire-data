@@ -131,3 +131,121 @@ async def test_verify_returns_transcription_likelihood_and_transcribed_segments(
             (segment.get("category") or "").upper() == "LIKELY_TRANSCRIBED"
             for segment in text_categorization
         )
+
+
+@pytest.mark.asyncio
+async def test_verify_returns_only_searched_text_not_full_document(db_pool):
+    """Verify response should return and categorize only the searched text snippet."""
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        full_text = "Alpha beta gamma"
+        query_text = "beta"
+
+        collect_events = [
+            KeystrokeEvent(
+                eventType="keydown",
+                key=char,
+                timestamp=datetime(2023, 1, 2, 0, 0, 0, idx * 100000),
+                dwellTimeMicros=80000,
+                sequence=idx + 1,
+            )
+            for idx, char in enumerate(full_text)
+        ]
+
+        collect_request = CollectRequest(
+            session_id="verify-query-snippet-session",
+            user_id="verify-query-snippet-user",
+            document_text=full_text,
+            events=collect_events,
+        )
+
+        collect_response = await client.post(
+            "/api/v1/keystroke/collect",
+            json=collect_request.model_dump(mode="json"),
+        )
+        assert collect_response.status_code == 200
+
+        verify_response = await client.post(
+            "/api/v1/keystroke/verify",
+            json=VerifyRequest(document_text=query_text).model_dump(mode="json"),
+        )
+
+        assert verify_response.status_code == 200
+        data = verify_response.json()
+        assert data.get("document_text") == query_text
+        assert data.get("document_text") != full_text
+
+        segments = data.get("text_categorization") or []
+        rebuilt = "".join(segment.get("text") or "" for segment in segments)
+        assert rebuilt == query_text
+
+
+@pytest.mark.asyncio
+async def test_verify_no_match_marks_query_as_not_in_system(db_pool):
+    """When no match exists, the entire searched text should be returned as NOT_IN_SYSTEM."""
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        query_text = "this phrase does not exist in records"
+        verify_response = await client.post(
+            "/api/v1/keystroke/verify",
+            json=VerifyRequest(document_text=query_text).model_dump(mode="json"),
+        )
+
+        assert verify_response.status_code == 200
+        data = verify_response.json()
+
+        assert data.get("can_prove_human") == "no"
+        assert data.get("document_text") == query_text
+
+        segments = data.get("text_categorization") or []
+        assert len(segments) == 1
+        assert segments[0].get("text") == query_text
+        assert (segments[0].get("category") or "").upper() == "NOT_IN_SYSTEM"
+
+
+@pytest.mark.asyncio
+async def test_verify_returns_ranked_top_hits_for_multiple_matches(db_pool):
+    """Verify should return ranked top_hits when multiple documents match a query."""
+    async with AsyncClient(app=app, base_url="http://testserver") as client:
+        query_text = "shared phrase"
+
+        docs = [
+            "first document contains shared phrase and extra words",
+            "second document also contains shared phrase for ranking",
+        ]
+
+        for idx, doc in enumerate(docs):
+            events = [
+                KeystrokeEvent(
+                    eventType="keydown",
+                    key=char,
+                    timestamp=datetime(2023, 1, 3, 0, 0, 0, idx * 100000 + j * 1000),
+                    dwellTimeMicros=75000,
+                    sequence=j + 1,
+                )
+                for j, char in enumerate(doc)
+            ]
+            collect_request = CollectRequest(
+                session_id=f"verify-top-hit-session-{idx}",
+                user_id=f"verify-top-hit-user-{idx}",
+                document_text=doc,
+                events=events,
+            )
+            collect_response = await client.post(
+                "/api/v1/keystroke/collect",
+                json=collect_request.model_dump(mode="json"),
+            )
+            assert collect_response.status_code == 200
+
+        verify_response = await client.post(
+            "/api/v1/keystroke/verify",
+            json={"document_text": query_text, "top_k": 5},
+        )
+
+        assert verify_response.status_code == 200
+        data = verify_response.json()
+
+        top_hits = data.get("top_hits") or []
+        assert len(top_hits) >= 2
+        for hit in top_hits:
+            assert hit.get("document_text") == query_text
+            rebuilt = "".join(seg.get("text") or "" for seg in (hit.get("text_categorization") or []))
+            assert rebuilt == query_text
