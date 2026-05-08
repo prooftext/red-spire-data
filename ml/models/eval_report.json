@@ -1,0 +1,62 @@
+{
+  "mode_classification": {
+    "accuracy": 1.0,
+    "macro_f1": 1.0,
+    "confusion_matrix": [
+      [
+        4,
+        0,
+        0
+      ],
+      [
+        0,
+        4,
+        0
+      ],
+      [
+        0,
+        0,
+        4
+      ]
+    ],
+    "roc_auc_ovr": 1.0,
+    "classes": [
+      "mixed",
+      "original",
+      "transcribed"
+    ]
+  },
+  "user_verification": {
+    "roc_auc": 0.7666666666666667,
+    "eer": 0.1590909090909091,
+    "eer_threshold": 0.9798994974874373,
+    "far_frr": {
+      "0.9799": {
+        "far": 0.13636363636363635,
+        "frr": 0.18181818181818182
+      },
+      "0.5": {
+        "far": 0.22727272727272727,
+        "frr": 0.030303030303030304
+      },
+      "0.7": {
+        "far": 0.22727272727272727,
+        "frr": 0.030303030303030304
+      },
+      "0.8": {
+        "far": 0.22727272727272727,
+        "frr": 0.030303030303030304
+      }
+    },
+    "pair_trials": 66
+  },
+  "by_source": {
+    "fixtures": 3,
+    "fixtures_aug": 9
+  },
+  "notes": {
+    "public_datasets": "Included when available in ml/raw and normalized into ml/processed.",
+    "production_weak_labels": "Included via exporter + deterministic weak labels.",
+    "manual_review_labels": "Not detected in this run unless present in input sessions."
+  }
+}

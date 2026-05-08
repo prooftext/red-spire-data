@@ -1,0 +1,5 @@
+{
+  "aggregate_scaler": "aggregate_scaler.joblib",
+  "feature_columns_source": "ml/src/config.py",
+  "sequence": "inference currently uses aggregate baseline for production path"
+}

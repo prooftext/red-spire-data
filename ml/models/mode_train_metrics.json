@@ -1,0 +1,158 @@
+{
+  "best_model": "logreg",
+  "best_macro_f1": 1.0,
+  "results": {
+    "logreg": {
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "roc_auc": 1.0,
+      "confusion_matrix": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          2
+        ]
+      ],
+      "classification_report": {
+        "mixed": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "original": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "transcribed": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 4.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 4.0
+        }
+      }
+    },
+    "random_forest": {
+      "accuracy": 1.0,
+      "macro_f1": 1.0,
+      "roc_auc": 1.0,
+      "confusion_matrix": [
+        [
+          1,
+          0,
+          0
+        ],
+        [
+          0,
+          1,
+          0
+        ],
+        [
+          0,
+          0,
+          2
+        ]
+      ],
+      "classification_report": {
+        "mixed": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "original": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 1.0
+        },
+        "transcribed": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 2.0
+        },
+        "accuracy": 1.0,
+        "macro avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 4.0
+        },
+        "weighted avg": {
+          "precision": 1.0,
+          "recall": 1.0,
+          "f1-score": 1.0,
+          "support": 4.0
+        }
+      }
+    }
+  },
+  "train_size": 8,
+  "test_size": 4,
+  "preprocess": {
+    "aggregate_scaler_path": "/mnt/c/Users/Avi/code/prooftext/red-spire-data/ml/processed/artifacts/aggregate_scaler.joblib",
+    "sequence_norm_path": "/mnt/c/Users/Avi/code/prooftext/red-spire-data/ml/processed/artifacts/sequence_norm.json",
+    "sequence_config": {
+      "max_len": 512,
+      "dwell_clip_us": 2000000,
+      "flight_clip_us": 2000000,
+      "paste_clip": 10000,
+      "delete_clip": 10000
+    },
+    "feature_columns": [
+      "dwell_mean",
+      "dwell_std",
+      "dwell_p10",
+      "dwell_p50",
+      "dwell_p90",
+      "flight_mean",
+      "flight_std",
+      "flight_p10",
+      "flight_p50",
+      "flight_p90",
+      "pause_mean",
+      "pause_std",
+      "pause_p90",
+      "pause_over_2s_ratio",
+      "paste_ratio",
+      "delete_ratio",
+      "navigation_ratio",
+      "modifier_fraction",
+      "avg_burst_length",
+      "avg_inter_paste_distance",
+      "text_growth_slope",
+      "text_growth_r2",
+      "cursor_jump_count",
+      "keydown_count",
+      "paste_event_count",
+      "delete_event_count",
+      "total_events"
+    ]
+  }
+}

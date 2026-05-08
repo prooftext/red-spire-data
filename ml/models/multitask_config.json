@@ -1,0 +1,11 @@
+{
+  "input_dim": 27,
+  "classes": [
+    "mixed",
+    "original",
+    "transcribed"
+  ],
+  "alpha": 0.5,
+  "epochs": 35,
+  "final_loss": 0.1950531303882599
+}

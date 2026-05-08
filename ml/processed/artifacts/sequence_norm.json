@@ -1,0 +1,9 @@
+{
+  "sequence_config": {
+    "max_len": 512,
+    "dwell_clip_us": 2000000,
+    "flight_clip_us": 2000000,
+    "paste_clip": 10000,
+    "delete_clip": 10000
+  }
+}

@@ -8,14 +8,17 @@ from app.database import init_db, close_db
 from app.routers import collect, verify, documentation
 from app.routers import analytics
 from app.routers import sessions as sessions_router
+from app.ml_inference import load_models_once
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     if not os.getenv("TESTING"):
         await init_db()
+        load_models_once()
         yield
         await close_db()
     else:
+        load_models_once()
         yield
 
 app = FastAPI(

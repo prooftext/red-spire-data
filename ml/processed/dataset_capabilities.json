@@ -1,0 +1,34 @@
+{
+  "cmu": {
+    "has_dwell": true,
+    "has_flight": true,
+    "has_event_type": false,
+    "has_cursor": false,
+    "supports_mode_label": false,
+    "supports_user_label": true
+  },
+  "keyrecs": {
+    "has_dwell": true,
+    "has_flight": true,
+    "has_event_type": true,
+    "has_cursor": true,
+    "supports_mode_label": false,
+    "supports_user_label": true
+  },
+  "lsia": {
+    "has_dwell": false,
+    "has_flight": false,
+    "has_event_type": true,
+    "has_cursor": false,
+    "supports_mode_label": true,
+    "supports_user_label": false
+  },
+  "prod": {
+    "has_dwell": true,
+    "has_flight": true,
+    "has_event_type": true,
+    "has_cursor": true,
+    "supports_mode_label": true,
+    "supports_user_label": true
+  }
+}

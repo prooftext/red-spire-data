@@ -1,0 +1,5 @@
+{
+  "input_dim": 27,
+  "embedding_dim": 128,
+  "threshold": 0.4572864321608041
+}
