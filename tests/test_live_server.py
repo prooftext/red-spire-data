@@ -11,8 +11,8 @@ import json
 import os
 from datetime import datetime
 
-# Live server endpoint
-LIVE_API_URL = os.getenv("LIVE_API_URL", "https://red-spire-data.onrender.com")
+# Live server endpoint (normalized so users can pass with or without trailing slash)
+LIVE_API_URL = os.getenv("LIVE_API_URL", "https://red-spire-data.onrender.com").rstrip("/")
 RUN_LIVE_SERVER_TESTS = os.getenv("RUN_LIVE_SERVER_TESTS", "0").lower() in {"1", "true", "yes"}
 
 pytestmark = pytest.mark.skipif(
