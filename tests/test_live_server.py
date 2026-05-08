@@ -8,10 +8,17 @@ Run with: pytest tests/test_live_server.py -v
 import pytest
 import httpx
 import json
+import os
 from datetime import datetime
 
 # Live server endpoint
-LIVE_API_URL = "https://red-spire-data.onrender.com"
+LIVE_API_URL = os.getenv("LIVE_API_URL", "https://red-spire-data.onrender.com")
+RUN_LIVE_SERVER_TESTS = os.getenv("RUN_LIVE_SERVER_TESTS", "0").lower() in {"1", "true", "yes"}
+
+pytestmark = pytest.mark.skipif(
+    not RUN_LIVE_SERVER_TESTS,
+    reason="Live server tests are opt-in. Set RUN_LIVE_SERVER_TESTS=1 to enable.",
+)
 
 
 @pytest.mark.asyncio

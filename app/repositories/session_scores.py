@@ -1,5 +1,5 @@
 import json
-from uuid import UUID
+from uuid import UUID, NAMESPACE_URL, uuid5
 
 
 def ensure_uuid(value):
@@ -9,7 +9,7 @@ def ensure_uuid(value):
         UUID(value)
         return value
     except (ValueError, AttributeError, TypeError):
-        return str(UUID(int=hash(str(value)) % (2**128)))
+        return str(uuid5(NAMESPACE_URL, f"prooftext:{value}"))
 
 
 async def ensure_session_scores_table(conn) -> None:

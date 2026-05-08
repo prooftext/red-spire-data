@@ -1,6 +1,6 @@
 import json
 import hashlib
-from uuid import UUID
+from uuid import UUID, NAMESPACE_URL, uuid5
 
 def ensure_uuid(value):
     """Convert string to UUID if valid, return as-is if already UUID, raise if invalid"""
@@ -10,9 +10,9 @@ def ensure_uuid(value):
         # Validate that it's a valid UUID string
         UUID(value)
         return value
-    except (ValueError, AttributeError):
-        # Not a valid UUID string, generate one
-        return str(UUID(int=hash(value) % (2**128)))
+    except (ValueError, AttributeError, TypeError):
+        # Not a valid UUID string: map deterministically to UUID5.
+        return str(uuid5(NAMESPACE_URL, f"prooftext:{value}"))
 
 async def session_exists(conn, session_id):
     """Check if a session already exists"""

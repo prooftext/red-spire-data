@@ -140,11 +140,12 @@ async def test_verify_returns_only_searched_text_not_full_document(db_pool):
         full_text = "Alpha beta gamma"
         query_text = "beta"
 
+        start_time = datetime(2023, 1, 2, 0, 0, 0)
         collect_events = [
             KeystrokeEvent(
                 eventType="keydown",
                 key=char,
-                timestamp=datetime(2023, 1, 2, 0, 0, 0, idx * 100000),
+                timestamp=start_time + timedelta(microseconds=100000 * idx),
                 dwellTimeMicros=80000,
                 sequence=idx + 1,
             )

@@ -1,5 +1,5 @@
 from typing import Iterable
-from uuid import UUID
+from uuid import UUID, NAMESPACE_URL, uuid5
 
 
 def ensure_uuid(value):
@@ -8,8 +8,8 @@ def ensure_uuid(value):
     try:
         UUID(value)
         return value
-    except (ValueError, AttributeError):
-        return str(UUID(int=hash(value) % (2**128)))
+    except (ValueError, AttributeError, TypeError):
+        return str(uuid5(NAMESPACE_URL, f"prooftext:{value}"))
 
 
 async def insert_detector_comparisons(conn, session_id: str, document_id: str | None, results: Iterable[dict], text_length: int) -> None:

@@ -3,12 +3,12 @@ from httpx import AsyncClient
 from app.main import app
 from app.models.requests import CollectRequest, KeystrokeEvent
 import hashlib
-from datetime import datetime
+from datetime import datetime, timezone
 
 @pytest.mark.asyncio
 async def test_session_metadata_endpoint(db_pool):
     async with AsyncClient(app=app, base_url="http://testserver") as client:
-        session_id = f"unit-session-{datetime.utcnow().timestamp()}"
+        session_id = f"unit-session-{datetime.now(timezone.utc).timestamp()}"
         user_id = "unit-user"
         document_text = "unit test document for metadata"
 
@@ -39,7 +39,7 @@ async def test_session_metadata_endpoint(db_pool):
 @pytest.mark.asyncio
 async def test_last_session_by_document_unit(db_pool):
     async with AsyncClient(app=app, base_url="http://testserver") as client:
-        session_id = f"unit-last-session-{datetime.utcnow().timestamp()}"
+        session_id = f"unit-last-session-{datetime.now(timezone.utc).timestamp()}"
         user_id = "unit-user"
         document_text = "unique document for last session lookup"
 
